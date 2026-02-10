@@ -1,0 +1,39 @@
+Analyze the following local development context and produce a comprehensive, technically detailed status update.
+
+Your goals:
+
+1. Completed work
+- Describe what has been completed.
+- Explain the technical nature of the work (for example documentation, refactor, script execution, configuration).
+
+2. Work currently in progress
+- Describe what appears to be in progress.
+- Explain how the work is being carried out at a technical level.
+
+3. Actively executing work
+- Identify anything that appears to be running right now.
+- Use tmux activity, active panes, commands, and recent timestamps as primary evidence.
+- Explain why you believe execution is ongoing or why it is not.
+
+4. Blocked, paused, or waiting work
+- Identify work that appears stalled, awaiting input, or paused.
+- Explain what signal indicates the pause or blockage.
+
+5. Near-term next actions
+- Suggest next actions ONLY when supported by explicit signals.
+- Explain the technical reasoning behind each suggested action.
+
+6. Uncertainty and gaps
+- Explicitly call out missing signals, ambiguity, or conflicting evidence.
+- Prefer saying "unclear" over guessing.
+
+Guidelines:
+- Treat tmux activity as the strongest signal of live execution.
+- Treat recent task edits as design, planning, or intent signals.
+- If tmux and tasks disagree, explain the discrepancy technically.
+- Do not infer future plans unless clearly stated in task content.
+
+Return JSON that EXACTLY matches the provided schema.
+
+Context JSON:
+{{CONTEXT_JSON}}

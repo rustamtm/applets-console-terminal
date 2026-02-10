@@ -1,0 +1,1941 @@
+:root {
+  --keyboard-offset: 0px;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: #0b0f14;
+  color: #e6edf3;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  -webkit-text-size-adjust: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.topbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 9;
+}
+
+.app.settingsOpen .topbar button:not(.settingsToggle),
+.app.settingsOpen .topbar a,
+.app.settingsOpen .topbar select,
+.app.settingsOpen .topbar input,
+.app.settingsOpen .mobileTopbar a,
+.app.settingsOpen .mobileTopbar button:not(.settingsToggle) {
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.app.settingsOpen .topbar button.settingsToggle,
+.app.settingsOpen .mobileTopbar button.settingsToggle {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.mobileTopbar {
+  display: none;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: calc(10px + env(safe-area-inset-top)) 10px 10px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 15, 20, 0.92);
+  position: sticky;
+  top: 0;
+  z-index: 9;
+}
+
+.mobileTopbarInfo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mobileTopbarTitle {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 42vw;
+}
+
+.mobileTopbarActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.mobileTopbarActions::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.mobileTopbar[data-editing="1"] {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.mobileTopbar[data-editing="1"] .mobileTopbarActions {
+  flex: 1 1 100%;
+  min-width: 100%;
+  margin-top: 10px;
+  overflow: visible;
+  -webkit-overflow-scrolling: auto;
+  touch-action: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-items: center;
+  gap: 8px;
+  padding: 10px 8px 8px 8px;
+}
+
+@media (max-width: 360px) {
+  .mobileTopbar[data-editing="1"] .mobileTopbarActions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.mobileTopbarEdit {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+.mobileEditToggle {
+  padding: 6px 10px;
+  min-width: 56px;
+  font-weight: 650;
+}
+
+.mobileActionHandle {
+  position: relative;
+  display: inline-flex;
+}
+
+.mobileTopbarActions[data-editing="1"] {
+  box-shadow: inset 0 0 0 1px rgba(100, 210, 255, 0.18);
+  border-radius: 12px;
+}
+
+.mobileTopbarActions[data-editing="1"] .mobileButton:active {
+  transform: none;
+}
+
+.mobileTopbar[data-editing="1"] .mobileActionHandle {
+  width: 100%;
+  justify-content: center;
+}
+
+.mobileTopbarActions[data-editing="1"] .mobileActionHandle {
+  cursor: grab;
+}
+
+.mobileTopbarActions[data-editing="1"] .mobileActionHandle.dragging {
+  cursor: grabbing;
+}
+
+.mobileTopbarActions[data-editing="1"] .mobileActionHandle::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 10px;
+  height: 10px;
+  opacity: 0.65;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 25% 25%, rgba(230, 237, 243, 0.85) 1px, transparent 2px),
+    radial-gradient(circle at 75% 25%, rgba(230, 237, 243, 0.85) 1px, transparent 2px),
+    radial-gradient(circle at 25% 75%, rgba(230, 237, 243, 0.85) 1px, transparent 2px),
+    radial-gradient(circle at 75% 75%, rgba(230, 237, 243, 0.85) 1px, transparent 2px);
+}
+
+.mobileButton {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e6edf3;
+  border-radius: 8px;
+  padding: 6px;
+  font-size: 12px;
+  min-width: 32px;
+  min-height: 32px;
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+}
+
+a.mobileButton {
+  text-decoration: none;
+}
+
+.mobileButton:active {
+  transform: translateY(1px);
+}
+
+.mobileActionHandle.dragging .mobileButton {
+  transform: translateY(1px) scale(1.08);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
+}
+
+.mobileButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mobileButton[data-active="1"],
+.button[data-active="1"] {
+  border-color: rgba(49, 208, 124, 0.38);
+  background: rgba(49, 208, 124, 0.14);
+}
+
+.mobileButton[data-attention="1"] {
+  position: relative;
+  border-color: rgba(100, 210, 255, 0.55);
+  box-shadow: 0 0 0 2px rgba(100, 210, 255, 0.22), 0 8px 18px rgba(0, 0, 0, 0.45);
+}
+
+.mobileButton[data-attention="1"]::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #64d2ff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 0 12px rgba(100, 210, 255, 0.75);
+  animation: statusPulse 1.1s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.topbar .spacer {
+  flex: 1;
+}
+
+.select,
+.input,
+.button {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: inherit;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  min-height: 40px;
+}
+
+.taskInput {
+  min-width: 220px;
+  flex: 1 1 220px;
+}
+
+.contextChip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  max-width: min(540px, 100%);
+}
+
+.contextLabel {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.contextValue {
+  font-size: 12px;
+  opacity: 0.85;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 420px;
+}
+
+.button {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+a.button {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button.danger {
+  border-color: rgba(255, 107, 107, 0.5);
+  background: rgba(255, 107, 107, 0.12);
+  color: #ffd7d7;
+}
+
+.button.danger:hover {
+  background: rgba(255, 107, 107, 0.18);
+}
+
+.iconButton {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+a.iconButton {
+  text-decoration: none;
+}
+
+.iconButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.iconButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.statusDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #6b7280;
+  box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.2);
+  flex: 0 0 auto;
+}
+
+.statusDot[data-status="connected"] {
+  background: #31d07c;
+  box-shadow: 0 0 0 2px rgba(49, 208, 124, 0.25);
+}
+
+.statusDot[data-status="connecting"] {
+  background: #f5a524;
+  box-shadow: 0 0 0 2px rgba(245, 165, 36, 0.25);
+  animation: statusPulse 1.2s ease-in-out infinite;
+}
+
+.statusDot[data-status="disconnected"] {
+  background: #ff6b6b;
+  box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.25);
+}
+
+.statusText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 380px;
+}
+
+@keyframes statusPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+.terminalWrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  --terminal-bg: #0b0f14;
+  --terminal-fab-size: 36px;
+  --terminal-fab-gap: 10px;
+  --terminal-fab-offset: calc(14px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+  background: var(--terminal-bg);
+}
+
+.terminalWrap.codexRunning {
+  /* Keep the terminal background consistent; Codex state is already visible via tabs/status. */
+  --terminal-bg: #0b0f14;
+}
+
+.terminalWrap .terminalHost {
+  background: var(--terminal-bg);
+  transition: background-color 200ms ease;
+}
+
+.terminalWrap .terminalContainer .xterm-viewport,
+.terminalWrap .terminalContainer .xterm-scrollable-element,
+.terminalWrap .terminalContainer .xterm-screen {
+  background-color: var(--terminal-bg) !important;
+  transition: background-color 200ms ease;
+}
+
+.pasteChip {
+  position: absolute;
+  right: 12px;
+  bottom: calc(var(--terminal-fab-offset) + var(--terminal-fab-size) + var(--terminal-fab-gap));
+  width: var(--terminal-fab-size);
+  height: var(--terminal-fab-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(12, 15, 20, 0.45);
+  backdrop-filter: blur(6px);
+  color: #e6edf3;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 150ms ease, transform 150ms ease;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.terminalWrap:hover .pasteChip,
+.pasteChip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pasteChipIcon {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pasteChipIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pasteChipText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uploadFab {
+  appearance: none;
+  -webkit-appearance: none;
+  position: absolute;
+  right: 12px;
+  bottom: var(--terminal-fab-offset);
+  width: var(--terminal-fab-size);
+  height: var(--terminal-fab-size);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(12, 15, 20, 0.5);
+  backdrop-filter: blur(6px);
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  z-index: 5;
+}
+
+.uploadFab:hover,
+.uploadFab:focus-visible {
+  opacity: 1;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+}
+
+.uploadFab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(100, 210, 255, 0.5), 0 10px 22px rgba(0, 0, 0, 0.35);
+}
+
+.uploadFab:active {
+  transform: translateY(1px);
+}
+
+.uploadFab:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.uploadFab svg {
+  width: 18px;
+  height: 18px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  white-space: nowrap;
+}
+
+.terminalHost {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  padding-bottom: calc(env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+}
+
+.terminalContainer {
+  width: 100%;
+  height: 100%;
+  touch-action: pan-y;
+}
+
+.terminalContainer .xterm-viewport {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.terminalScrollScrubber {
+  position: absolute;
+  top: 10px;
+  right: calc(4px + env(safe-area-inset-right));
+  bottom: calc(10px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+  width: 18px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 160ms ease;
+  pointer-events: none;
+}
+
+.terminalScrollScrubber.visible {
+  opacity: 0.55;
+  pointer-events: auto;
+}
+
+.terminalScrollScrubber.scrubbing {
+  opacity: 1;
+}
+
+.app.showTerminalMobileBar .terminalScrollScrubber {
+  bottom: calc(72px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+}
+
+.terminalScrollScrubberRail {
+  position: relative;
+  width: 10px;
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.terminalScrollScrubberThumb {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  border-radius: 999px;
+  background: rgba(100, 210, 255, 0.55);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.terminalScrollScrubber.scrubbing .terminalScrollScrubberRail,
+.terminalScrollScrubber.visible .terminalScrollScrubberRail {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.terminalScrollScrubber.scrubbing .terminalScrollScrubberThumb {
+  background: rgba(100, 210, 255, 0.75);
+}
+
+.terminalScrollScrubberButton {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #e6edf3;
+  font-size: 14px;
+  line-height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-bottom: 6px;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.terminalScrollScrubber.visible .terminalScrollScrubberButton,
+.terminalScrollScrubber.scrubbing .terminalScrollScrubberButton {
+  opacity: 0.45;
+}
+
+.terminalScrollScrubberButton:hover,
+.terminalScrollScrubberButton:focus-visible {
+  opacity: 0.95;
+}
+
+.terminalMobileBar {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: calc(8px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(12, 15, 20, 0.92);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+  z-index: 4;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.terminalMobileBar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.terminalMobileBar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+}
+
+.app.showTerminalMobileBar .terminalHost {
+  padding-bottom: calc(56px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+}
+
+.app.showTerminalMobileBar .terminalMobileBar {
+  display: flex;
+}
+
+.app.showTerminalMobileBar .terminalScrollLock {
+  bottom: calc(64px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+}
+
+.app.showTerminalMobileBar .terminalWrap {
+  --terminal-fab-offset: calc(78px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+}
+
+.terminalMobileButton {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  min-width: 42px;
+  min-height: 32px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  touch-action: manipulation;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.terminalMobileButton:active {
+  transform: translateY(1px);
+}
+
+.terminalMobileIcon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  /* Keep icons readable even if a parent button's text color gets overridden (notably on iOS disabled states). */
+  color: #e6edf3;
+  background-color: currentColor;
+  /* iOS Safari can treat SVG masks as luminance by default; force alpha masking so icon stroke color won't disappear. */
+  -webkit-mask-mode: alpha;
+  mask-mode: alpha;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+
+.terminalCompose {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(12, 15, 20, 0.92);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  z-index: 4;
+}
+
+.terminalComposeInput {
+  width: 100%;
+  min-height: 72px;
+  max-height: 220px;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 12, 16, 0.9);
+  color: #e6edf3;
+  font-size: 13px;
+  line-height: 1.45;
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Monaco, Consolas, monospace;
+}
+
+.terminalComposeInput:focus {
+  outline: none;
+  border-color: rgba(100, 210, 255, 0.5);
+  box-shadow: 0 0 0 2px rgba(100, 210, 255, 0.15);
+}
+
+.terminalComposeActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.terminalComposeButton {
+  flex: 1 1 auto;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.terminalScrollLock {
+  position: absolute;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(15, 18, 24, 0.9);
+  color: #e6edf3;
+  font-size: 12px;
+  z-index: 4;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+.terminalScrollLockLabel {
+  opacity: 0.8;
+}
+
+.terminalScrollLockButton {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.terminalScrollLockButton:active {
+  transform: translateY(1px);
+}
+
+.autoNameStrip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #000;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.autoNameStripLabel {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.autoNameStripValue {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sessionTabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 6px 12px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.015);
+  overflow-x: auto;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.sessionTabs[data-dragging="1"] {
+  user-select: none;
+}
+
+.sessionTabs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.sessionTabs::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+}
+
+.sessionTab {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--tab-color, #6ea8ff);
+  border-radius: 10px 10px 6px 6px;
+  height: 20px;
+  min-width: 44px;
+  padding: 0;
+  cursor: pointer;
+  touch-action: pan-x;
+  position: relative;
+  opacity: 0.75;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 6px rgba(0, 0, 0, 0.35);
+  transition: transform 120ms ease, opacity 120ms ease, box-shadow 120ms ease;
+  margin-bottom: -1px;
+  flex: 0 0 auto;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.sessionTab.dragging {
+  opacity: 1;
+  transform: translateY(1px) scale(1.06);
+  cursor: grabbing;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 10px 20px rgba(0, 0, 0, 0.55);
+}
+
+.sessionTabCap {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 4px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.sessionTabStatus {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #6b7280;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.sessionTabStatus.running {
+  background: #f59e0b;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 0 10px rgba(245, 158, 11, 0.55);
+  animation: statusPulse 1.2s ease-in-out infinite;
+}
+
+.sessionTabStatus.done {
+  background: #22c55e;
+}
+
+.sessionTabStatus.idle {
+  background: #6b7280;
+}
+
+.sessionTab[data-attention="1"] {
+  opacity: 1;
+  border-color: rgba(100, 210, 255, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 0 0 2px rgba(100, 210, 255, 0.22),
+    0 8px 18px rgba(0, 0, 0, 0.45);
+}
+
+.sessionTab[data-attention="1"] .sessionTabStatus {
+  background: #64d2ff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 0 12px rgba(100, 210, 255, 0.75);
+  animation: statusPulse 1.1s ease-in-out infinite;
+}
+
+.sessionTabLabel {
+  position: absolute;
+  left: 6px;
+  right: 14px;
+  bottom: 2px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+.sessionTab:hover {
+  opacity: 0.92;
+}
+
+.sessionTab.active {
+  opacity: 1;
+  transform: translateY(1px);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 4px 10px rgba(0, 0, 0, 0.45);
+}
+
+.sessionTab:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.sessionPanel {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  display: grid;
+  gap: 12px;
+  /* Body scroll is disabled; keep the sessions panel scrollable when the list is long (tablet/desktop). */
+  max-height: 60vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.sessionPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sessionPanelActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sessionSection {
+  display: grid;
+  gap: 8px;
+}
+
+.sessionTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sessionTitleActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sessionTitle {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.sessionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sessionRow.active {
+  border-color: rgba(100, 210, 255, 0.45);
+  box-shadow: 0 0 0 1px rgba(100, 210, 255, 0.08) inset;
+}
+
+.sessionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sessionNameRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sessionStatusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #6b7280;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  flex: 0 0 auto;
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.sessionStatusDot.running {
+  background: #f59e0b;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 0 8px rgba(245, 158, 11, 0.5);
+  animation: statusPulse 1.2s ease-in-out infinite;
+}
+
+.sessionStatusDot.done {
+  background: #22c55e;
+}
+
+.sessionStatusDot.idle {
+  background: #6b7280;
+}
+
+.sessionName {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sessionTaskName {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sessionMeta {
+  font-size: 11px;
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sessionActions {
+  display: flex;
+  gap: 8px;
+}
+
+.sessionEmpty {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.debugPanel {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  display: grid;
+  gap: 8px;
+}
+
+.debugHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.debugTitle {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.debugActions {
+  display: flex;
+  gap: 8px;
+}
+
+.debugLog {
+  max-height: 220px;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 11px;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+
+.codexPanel {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  display: grid;
+  gap: 10px;
+}
+
+.codexHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.codexTitle {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.codexHint {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.codexPrompt {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  resize: vertical;
+}
+
+.codexRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.codexInput {
+  min-width: 160px;
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+}
+
+.codexToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.codexStatus {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.codexLog {
+  max-height: 220px;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.briefPanel {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  display: grid;
+  gap: 12px;
+}
+
+.briefHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.briefTitle {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.briefHint {
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.briefTextarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  resize: vertical;
+}
+
+.briefReport {
+  max-height: 260px;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 11px;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+
+.briefCost {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.briefCostItem {
+  white-space: nowrap;
+}
+
+.briefButton {
+  position: relative;
+}
+
+.briefBadge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 10px;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.iconButton.briefButton[data-loading="1"] .terminalMobileIcon,
+.mobileButton[data-loading="1"] .terminalMobileIcon {
+  animation: briefSpin 0.9s linear infinite;
+}
+
+@keyframes briefSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.audioPanel {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  display: grid;
+  gap: 12px;
+}
+
+.audioHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.audioTitle {
+  font-weight: 600;
+}
+
+.audioHint {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.audioSection {
+  display: grid;
+  gap: 8px;
+}
+
+.audioSectionTitle {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.audioNotice {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.audioField {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.audioKey {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  white-space: nowrap;
+}
+
+.audioRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.audioToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.audioToggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #64d2ff;
+}
+
+.audioInput {
+  min-width: 160px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  font-size: 13px;
+}
+
+.audioRange {
+  width: 140px;
+}
+
+.audioValue {
+  min-width: 36px;
+  text-align: right;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.audioStatus {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+
+.app.compact {
+  --compact-gutter: 44px;
+}
+
+.app.compact .topbar {
+  display: none;
+}
+
+.app.compact.compactDock-right .terminalWrap {
+  padding-right: var(--compact-gutter);
+}
+
+.app.compact.compactDock-left .terminalWrap {
+  padding-left: var(--compact-gutter);
+}
+
+.compactToggle {
+  appearance: none;
+  -webkit-appearance: none;
+  position: absolute;
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(12, 15, 20, 0.6);
+  color: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  opacity: 0.45;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  transition: opacity 160ms ease, box-shadow 160ms ease;
+  touch-action: none;
+  user-select: none;
+}
+
+.compactToggle:hover,
+.compactToggle:focus-visible,
+.compactToggle.dragging {
+  opacity: 1;
+}
+
+.compactToggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(100, 210, 255, 0.5), 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.compactToggle.dragging {
+  cursor: grabbing;
+}
+
+.compactToggleIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compactToggleIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.compactToggleLabel {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  white-space: nowrap;
+  transition: max-width 160ms ease, opacity 160ms ease;
+}
+
+.compactToggle:hover .compactToggleLabel,
+.compactToggle:focus-visible .compactToggleLabel,
+.compactToggle.dragging .compactToggleLabel {
+  max-width: 160px;
+  opacity: 0.9;
+}
+
+.compactToggle[data-dock^="right"] {
+  right: 8px;
+}
+
+.compactToggle[data-dock^="left"] {
+  left: 8px;
+}
+
+.compactToggle[data-dock$="top"] {
+  top: calc(12px + env(safe-area-inset-top));
+}
+
+.compactToggle[data-dock$="middle"] {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.compactToggle[data-dock$="bottom"] {
+  bottom: calc(12px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+.settingsOverlay {
+  z-index: 8;
+}
+
+.settingsCard {
+  width: min(760px, calc(100% - 24px));
+  max-height: min(82vh, 760px);
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(14, 17, 22, 0.96);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.settingsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settingsTitle {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.settingsBody {
+  display: grid;
+  gap: 16px;
+  overflow: auto;
+  padding-right: 4px;
+  max-height: calc(82vh - 72px);
+}
+
+.settingsCard .audioPanel {
+  background: transparent;
+  border-bottom: none;
+  padding: 0;
+}
+
+.settingsCard .audioSection + .audioSection {
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settingsCard .briefPanel,
+.settingsCard .debugPanel {
+  background: transparent;
+  border-bottom: none;
+  padding: 0;
+}
+
+.settingsCard .audioPanel + .briefPanel,
+.settingsCard .briefPanel + .debugPanel {
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settingsCard .terminalPanel + .audioPanel {
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.card {
+  max-width: 520px;
+  width: calc(100% - 24px);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(18, 18, 20, 0.9);
+}
+
+.card h2 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.card p {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.card .row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+@media (pointer: coarse) and (min-width: 721px) and (max-width: 1400px) {
+  .topbar .buttonLabel {
+    display: none;
+  }
+
+  /* Tablet touch targets: make icon-only controls large enough to tap comfortably. */
+  .topbar .terminalMobileIcon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .topbar .button,
+  .topbar a.button {
+    padding: 14px;
+    min-width: 64px;
+    min-height: 64px;
+  }
+
+  .topbar .select,
+  .topbar .input {
+    padding: 14px 16px;
+    min-height: 64px;
+    font-size: 16px;
+  }
+
+  .topbar .iconButton {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+  }
+
+  .topbar .iconButton svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 720px) {
+  .mobileTopbar {
+    display: flex;
+  }
+
+  .topbar.mobileControls {
+    padding-top: 10px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    touch-action: pan-x;
+  }
+
+  .topbar.mobileControls::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  .topbar.mobileControls .buttonLabel,
+  .topbar.mobileControls .statusText {
+    display: none;
+  }
+
+  .topbar.mobileControls .select {
+    flex: 0 0 auto;
+    min-width: 120px;
+  }
+
+  .topbar.mobileControls .button,
+  .topbar.mobileControls a.button {
+    padding: 8px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .topbar.mobileControls .iconButton {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+
+  .main {
+    overflow: hidden;
+  }
+
+  .sessionPanel {
+    max-height: 44vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .select,
+  .input,
+  .button {
+    font-size: 15px;
+  }
+
+  .contextLabel {
+    font-size: 12px;
+  }
+
+  .contextValue {
+    font-size: 13px;
+  }
+
+  .topbar {
+    padding: calc(10px + env(safe-area-inset-top)) 10px 12px 10px;
+    gap: 8px;
+  }
+
+  .topbar .spacer {
+    display: none;
+  }
+
+  .select {
+    flex: 1 1 100%;
+  }
+
+  .audioField {
+    flex: 1 1 100%;
+  }
+
+  .audioField .select,
+  .audioField .audioInput {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .audioInput {
+    flex: 1 1 100%;
+    font-size: 14px;
+  }
+
+  .audioToggle input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+
+  .audioToggle {
+    font-size: 14px;
+  }
+
+  .audioHint,
+  .audioSectionTitle,
+  .audioNotice,
+  .audioValue,
+  .audioStatus {
+    font-size: 13px;
+  }
+
+  .input {
+    flex: 1 1 100%;
+  }
+
+  .button {
+    flex: 1 1 48%;
+  }
+
+  .status {
+    flex: 1 1 100%;
+    font-size: 12px;
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  .statusText {
+    max-width: 100%;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .card h2 {
+    font-size: 17px;
+  }
+
+  .card p {
+    font-size: 14px;
+  }
+
+  .card .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sessionTitle {
+    font-size: 12px;
+  }
+
+  .sessionName {
+    font-size: 14px;
+  }
+
+  .sessionMeta {
+    font-size: 12px;
+  }
+
+  .sessionEmpty {
+    font-size: 13px;
+  }
+
+  .sessionRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sessionActions {
+    width: 100%;
+  }
+
+  .debugTitle {
+    font-size: 13px;
+  }
+
+  .debugLog {
+    font-size: 12px;
+  }
+
+  .codexTitle {
+    font-size: 12px;
+  }
+
+  .codexHint,
+  .codexToggle,
+  .codexStatus {
+    font-size: 13px;
+  }
+
+  .codexLog {
+    font-size: 12px;
+  }
+
+  .terminalComposeInput {
+    font-size: 14px;
+  }
+
+  .terminalHost {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+  }
+
+  .terminalMobileBar {
+    display: flex;
+  }
+
+  .terminalScrollLock {
+    bottom: calc(64px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+  }
+
+  .terminalWrap {
+    --terminal-fab-offset: calc(78px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
+  }
+
+  .app.compact {
+    --compact-gutter: 38px;
+  }
+
+  .compactToggle {
+    padding: 6px 8px;
+  }
+
+  .compactToggleIcon,
+  .compactToggleIcon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .settingsCard {
+    width: calc(100% - 16px);
+    max-height: calc(100% - 16px);
+  }
+
+  .settingsBody {
+    max-height: calc(100vh - 120px);
+  }
+}
