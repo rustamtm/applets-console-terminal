@@ -2814,9 +2814,23 @@ export function createConsoleApp(opts: ConsoleAppOptions = {}): ConsoleApp {
   };
 
   // Serve chat UI if present (at /chat path).
-  const chatUiDist = path.resolve(opts.uiDist ? opts.uiDist.replace("/ui/", "/ui-chat/").replace("/ui-chat/", "/ui-chat/") : "console-terminal/ui-chat/dist");
-  const chatUiIndex = path.join(chatUiDist, "index.html");
-  if (fs.existsSync(chatUiIndex)) {
+  // Prefer the latest dedicated chat app (`console-terminal/console-chat/dist`)
+  // and fall back to the legacy `ui-chat` build when needed.
+  const legacyChatUiDist = opts.uiDist
+    ? opts.uiDist.replace("/ui/", "/ui-chat/").replace("/ui-chat/", "/ui-chat/")
+    : "console-terminal/ui-chat/dist";
+  const chatUiDistCandidates = [
+    (env.CONSOLE_CHAT_UI_DIST || "").trim(),
+    "console-terminal/console-chat/dist",
+    legacyChatUiDist
+  ]
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+  const chatUiDist = chatUiDistCandidates
+    .map((entry) => path.resolve(entry))
+    .find((entry) => fs.existsSync(path.join(entry, "index.html")));
+  const chatUiIndex = chatUiDist ? path.join(chatUiDist, "index.html") : "";
+  if (chatUiDist && chatUiIndex && fs.existsSync(chatUiIndex)) {
     const getChatRenderedIndex = (() => {
       let cachedMtimeMs = -1;
       let cachedHtml = "";
