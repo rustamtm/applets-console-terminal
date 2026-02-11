@@ -111,7 +111,7 @@
         parsed = [
           {
             id: uid(),
-            mode: legacyMode || "tmux",
+            mode: legacyMode || "shell",
             cwd: legacyCwd || "",
             resumeKey: legacyResumeKey || makeResumeKey(),
             createdAt: Date.now()
@@ -124,7 +124,7 @@
       parsed = [
         {
           id: uid(),
-          mode: "tmux",
+          mode: "shell",
           cwd: "",
           resumeKey: makeResumeKey(),
           createdAt: Date.now()
@@ -539,7 +539,7 @@
 
   function createTabFromCurrent() {
     const current = getActiveTab();
-    const mode = current ? current.mode : (modeSelect ? modeSelect.value : "tmux");
+    const mode = current ? current.mode : (modeSelect ? modeSelect.value : "shell");
     const cwd = current ? current.cwd : (cwdInput ? cwdInput.value.trim() : "");
     return sanitizeTab({
       id: uid(),
@@ -577,7 +577,7 @@
 
     tabs.splice(index, 1);
     if (!tabs.length) {
-      const fallback = sanitizeTab({ id: uid(), mode: "tmux", cwd: "", resumeKey: makeResumeKey() }, 0);
+      const fallback = sanitizeTab({ id: uid(), mode: "shell", cwd: "", resumeKey: makeResumeKey() }, 0);
       tabs.push(fallback);
     }
 

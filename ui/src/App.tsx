@@ -1222,7 +1222,7 @@ async function getJson<T>(url: string): Promise<T> {
 }
 
 export function App() {
-  const [mode, setMode] = useState<Mode>("tmux");
+  const [mode, setMode] = useState<Mode>("shell");
   const [autoOpenMacosTerminal, setAutoOpenMacosTerminal] = useState<boolean>(() => loadAutoOpenMacosTerminal());
   const [promptTmuxNameOnCreate, setPromptTmuxNameOnCreate] = useState<boolean>(() => loadPromptTmuxNameOnCreate());
   const [terminalHelperBarOnTablet, setTerminalHelperBarOnTablet] = useState<boolean>(() => loadTerminalHelperBarOnTablet());

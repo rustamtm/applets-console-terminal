@@ -39,7 +39,7 @@ const ConfigSchema = z.object({
   requireAppToken: BoolEnv.default(false),
   appToken: z.string().optional(),
 
-  enableShell: BoolEnv.default(false),
+  enableShell: BoolEnv.default(true),
   enableNode: BoolEnv.default(true),
   enableReadonlyTail: BoolEnv.default(false),
   enableTmux: BoolEnv.default(false),
