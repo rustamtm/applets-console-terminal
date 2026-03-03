@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Gesture Playground</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0f14;
+        --panel: rgba(12, 15, 20, 0.88);
+        --panel2: rgba(16, 22, 31, 0.7);
+        --text: #e6edf3;
+        --muted: rgba(230, 237, 243, 0.7);
+        --border: rgba(255, 255, 255, 0.1);
+        --accent: #64d2ff;
+        --good: #31d07c;
+        --warn: #f5a524;
+        --bad: #ff6b6b;
+        --shadow: rgba(0, 0, 0, 0.45);
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        background: radial-gradient(1200px 900px at 10% -10%, #152235 0%, rgba(11, 15, 20, 0) 55%),
+          radial-gradient(900px 700px at 110% 0%, #0f2a1f 0%, rgba(11, 15, 20, 0) 60%), var(--bg);
+        color: var(--text);
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        line-height: 1.4;
+        overscroll-behavior: none;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(10, 15, 22, 0.72);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: calc(14px + env(safe-area-inset-top)) 16px 14px;
+      }
+
+      .title {
+        font-weight: 750;
+        letter-spacing: 0.01em;
+        font-size: 18px;
+        margin: 0 0 4px;
+      }
+
+      .subtitle {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 0 0 10px;
+      }
+
+      .links {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        font-size: 13px;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 18px 16px 70px;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 16px 34px var(--shadow);
+        margin: 0 0 14px;
+      }
+
+      h1,
+      h2 {
+        margin: 0 0 10px;
+        font-size: 15px;
+        letter-spacing: 0.01em;
+      }
+
+      h1 {
+        font-size: 16px;
+      }
+
+      p {
+        margin: 8px 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+        gap: 14px;
+        align-items: start;
+      }
+
+      @media (max-width: 960px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .surface {
+        border: 1px dashed rgba(255, 255, 255, 0.18);
+        border-radius: 16px;
+        min-height: 260px;
+        background: linear-gradient(135deg, rgba(100, 210, 255, 0.12), rgba(49, 208, 124, 0.08));
+        padding: 14px;
+        position: relative;
+        outline: none;
+        touch-action: none;
+        overscroll-behavior: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+      }
+
+      .surface:focus-visible {
+        outline: 2px solid rgba(100, 210, 255, 0.8);
+        outline-offset: 2px;
+      }
+
+      .surfaceTop {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .surfaceTitle {
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        font-size: 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(12, 15, 20, 0.44);
+        color: rgba(230, 237, 243, 0.9);
+        font-family: var(--mono);
+      }
+
+      .pill.muted {
+        opacity: 0.7;
+      }
+
+      .pill[data-level="good"] {
+        border-color: rgba(49, 208, 124, 0.35);
+      }
+
+      .pill[data-level="warn"] {
+        border-color: rgba(245, 165, 36, 0.4);
+      }
+
+      .pill[data-level="bad"] {
+        border-color: rgba(255, 107, 107, 0.45);
+      }
+
+      .surfaceBody {
+        margin-top: 12px;
+        font-size: 13px;
+        color: rgba(230, 237, 243, 0.86);
+      }
+
+      .surfaceBody .hint {
+        margin: 8px 0;
+        color: var(--muted);
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 14px;
+        align-items: center;
+        margin-top: 12px;
+        padding: 12px;
+        background: var(--panel2);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+      }
+
+      label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: rgba(230, 237, 243, 0.85);
+      }
+
+      input[type="checkbox"],
+      input[type="radio"] {
+        width: 16px;
+        height: 16px;
+      }
+
+      button {
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      .kv {
+        padding: 12px;
+        background: var(--panel2);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+      }
+
+      .kvTitle {
+        font-size: 12px;
+        font-weight: 750;
+        margin: 0 0 8px;
+        color: rgba(230, 237, 243, 0.88);
+      }
+
+      .kvBody {
+        font-size: 12px;
+        color: var(--muted);
+        font-family: var(--mono);
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 8px 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        vertical-align: top;
+      }
+
+      th {
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: rgba(230, 237, 243, 0.65);
+      }
+
+      td:nth-child(2),
+      td:nth-child(3),
+      td:nth-child(4) {
+        white-space: nowrap;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 2px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(0, 0, 0, 0.18);
+        font-size: 11px;
+        color: rgba(230, 237, 243, 0.86);
+      }
+
+      .tag.good {
+        border-color: rgba(49, 208, 124, 0.4);
+      }
+
+      .tag.bad {
+        border-color: rgba(255, 107, 107, 0.45);
+      }
+
+      .log {
+        background: rgba(8, 12, 16, 0.92);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: rgba(230, 237, 243, 0.9);
+        max-height: 320px;
+        overflow: auto;
+        white-space: pre;
+      }
+
+      pre {
+        background: rgba(8, 12, 16, 0.92);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px;
+        overflow: auto;
+        margin: 0;
+      }
+
+      code {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: rgba(214, 230, 255, 0.95);
+      }
+
+      ul {
+        margin: 10px 0 0;
+        padding-left: 18px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      li {
+        margin: 6px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="title">Gesture Playground</div>
+      <div class="subtitle">See which DOM events your trackpad/touch gestures emit, plus a runnable listener snippet.</div>
+      <div class="links">
+        <a href="./">Back to Console</a>
+        <a href="docs.html">Docs</a>
+        <a href="browser_tts.html">Browser TTS</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h1>Swipe Detection</h1>
+        <p>
+          Click the surface to focus, then try: trackpad two-finger left/right, two-finger scroll, pinch-to-zoom, and (on
+          iOS Safari) pinch/rotate.
+        </p>
+
+        <div class="grid">
+          <div>
+            <div id="surface" class="surface" tabindex="0" aria-label="Gesture surface">
+              <div class="surfaceTop">
+                <div class="surfaceTitle">Gesture surface</div>
+                <div class="pills">
+                  <div id="activeGesture" class="pill" data-level="warn">Active: idle</div>
+                  <div id="lastEvent" class="pill muted">Last: (none)</div>
+                </div>
+              </div>
+              <div class="surfaceBody">
+                <div class="hint">
+                  Tip: many trackpad gestures show up as <span class="tag">wheel</span> events with <span class="tag">deltaX</span>/<span class="tag">deltaY</span>.
+                  Some browser back/forward navigation swipes are not delivered to JavaScript.
+                </div>
+                <div class="hint">
+                  Try: two-finger swipe left/right, pinch, and diagonal moves. Watch the "Active" pill and the event log.
+                </div>
+              </div>
+            </div>
+
+            <div class="controls">
+              <label><input type="radio" name="scope" value="window" checked /> listen on window (capture)</label>
+              <label><input type="radio" name="scope" value="surface" /> listen on surface only</label>
+              <label><input id="includeMoves" type="checkbox" /> include move events (noisy)</label>
+              <label><input id="preventDefault" type="checkbox" /> prevent default (wheel/touch/gesture)</label>
+              <button id="clearLog" type="button">Clear log</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="kv" style="margin-bottom: 12px">
+              <div class="kvTitle">Capabilities</div>
+              <div class="kvBody" id="capabilities"></div>
+            </div>
+
+            <div class="kv">
+              <div class="kvTitle">Observed Events</div>
+              <div style="overflow: auto; max-height: 360px">
+                <table aria-label="Observed events">
+                  <thead>
+                    <tr>
+                      <th>Event</th>
+                      <th>Supported</th>
+                      <th>Count</th>
+                      <th>Last</th>
+                    </tr>
+                  </thead>
+                  <tbody id="eventsBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Event Log</h2>
+        <div id="log" class="log" aria-label="Event log"></div>
+      </section>
+
+      <section class="card">
+        <h2>Code Snippet</h2>
+        <p>Snippet updates based on the last event type observed.</p>
+        <pre><code id="snippet"></code></pre>
+      </section>
+
+      <section class="card">
+        <h2>Notes</h2>
+        <ul>
+          <li>Browser history navigation gestures (two-finger swipe for back/forward) are usually not observable in JS.</li>
+          <li>macOS Chrome often emits pinch-to-zoom as <span class="tag">wheel</span> events with <span class="tag">ctrlKey=true</span>.</li>
+          <li>iOS Safari may emit <span class="tag">gesturestart</span>/<span class="tag">gesturechange</span>/<span class="tag">gestureend</span>.</li>
+        </ul>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const $ = (id) => document.getElementById(id);
+        const surface = $("surface");
+        const activeEl = $("activeGesture");
+        const lastEventEl = $("lastEvent");
+        const logEl = $("log");
+        const snippetEl = $("snippet");
+        const capsEl = $("capabilities");
+        const tbody = $("eventsBody");
+        const includeMovesEl = $("includeMoves");
+        const preventDefaultEl = $("preventDefault");
+        const clearBtn = $("clearLog");
+
+        const MAX_LOG_LINES = 220;
+        const NOISY_THROTTLE_MS = 50;
+        const ACTIVE_GESTURE_DECAY_MS = 700;
+
+        const state = {
+          scope: "window",
+          includeMoves: false,
+          preventDefault: false,
+          startedAt: performance.now(),
+          counts: new Map(),
+          lastAt: new Map(),
+          lastNoisyAt: new Map(),
+          activeTimer: null
+        };
+
+        const touch = {
+          active: false,
+          startX: 0,
+          startY: 0,
+          lastX: 0,
+          lastY: 0,
+          startDist: 0,
+          startAngle: 0,
+          startedMulti: false
+        };
+
+        const EVENT_DEFS = [
+          { type: "wheel", noisy: true },
+          { type: "scroll", noisy: true },
+          { type: "pointerdown" },
+          { type: "pointermove", noisy: true },
+          { type: "pointerup" },
+          { type: "pointercancel" },
+          { type: "touchstart" },
+          { type: "touchmove", noisy: true },
+          { type: "touchend" },
+          { type: "touchcancel" },
+          { type: "gesturestart" },
+          { type: "gesturechange", noisy: true },
+          { type: "gestureend" },
+          { type: "keydown" },
+          { type: "keyup" }
+        ];
+
+        const supportsEvent = (type) => {
+          try {
+            return ("on" + type) in window;
+          } catch {
+            return false;
+          }
+        };
+
+        const nowMs = () => performance.now();
+
+        const fmtMs = (ms) => {
+          if (ms < 1000) return `${Math.round(ms)}ms`;
+          return `${(ms / 1000).toFixed(2)}s`;
+        };
+
+        const safeNodeLabel = (node) => {
+          if (!node || !(node instanceof Element)) return "(none)";
+          const id = node.getAttribute("id");
+          if (id) return `#${id}`;
+          const cls = (node.getAttribute("class") || "").trim().split(/\s+/).filter(Boolean)[0];
+          if (cls) return `${node.tagName.toLowerCase()}.${cls}`;
+          return node.tagName.toLowerCase();
+        };
+
+        const setActive = (name, level, details) => {
+          if (state.activeTimer) {
+            clearTimeout(state.activeTimer);
+            state.activeTimer = null;
+          }
+          activeEl.textContent = details ? `Active: ${name} (${details})` : `Active: ${name}`;
+          activeEl.dataset.level = level || "warn";
+          state.activeTimer = setTimeout(() => {
+            activeEl.textContent = "Active: idle";
+            activeEl.dataset.level = "warn";
+            state.activeTimer = null;
+          }, ACTIVE_GESTURE_DECAY_MS);
+        };
+
+        const appendLog = (line) => {
+          const lines = logEl.textContent ? logEl.textContent.split("\n") : [];
+          lines.push(line);
+          while (lines.length > MAX_LOG_LINES) lines.shift();
+          logEl.textContent = lines.join("\n");
+          logEl.scrollTop = logEl.scrollHeight;
+        };
+
+        const updateCapabilities = () => {
+          const parts = [];
+          parts.push(`userAgent: ${navigator.userAgent}`);
+          parts.push(`maxTouchPoints: ${String(navigator.maxTouchPoints || 0)}`);
+          parts.push(`PointerEvent: ${String(typeof window.PointerEvent === "function")}`);
+          parts.push(`TouchEvent: ${String(typeof window.TouchEvent === "function")}`);
+          parts.push(`GestureEvent: ${String(typeof window.GestureEvent === "function")}`);
+          parts.push(`(feature detect) ontouchstart: ${String("ontouchstart" in window)}`);
+          parts.push(`(feature detect) ongesturestart: ${String("ongesturestart" in window)}`);
+          parts.push(`matchMedia (pointer: coarse): ${String(window.matchMedia?.("(pointer: coarse)")?.matches ?? false)}`);
+          capsEl.textContent = parts.join("\n");
+        };
+
+        const ensureTableRows = () => {
+          tbody.textContent = "";
+          for (const def of EVENT_DEFS) {
+            const tr = document.createElement("tr");
+            tr.dataset.eventType = def.type;
+
+            const tdType = document.createElement("td");
+            tdType.textContent = def.type;
+            tr.appendChild(tdType);
+
+            const tdSupported = document.createElement("td");
+            const supported = supportsEvent(def.type);
+            tdSupported.innerHTML = supported
+              ? '<span class="tag good">yes</span>'
+              : '<span class="tag bad">no</span>';
+            tr.appendChild(tdSupported);
+
+            const tdCount = document.createElement("td");
+            tdCount.textContent = "0";
+            tdCount.dataset.field = "count";
+            tr.appendChild(tdCount);
+
+            const tdLast = document.createElement("td");
+            tdLast.textContent = "never";
+            tdLast.dataset.field = "last";
+            tr.appendChild(tdLast);
+
+            tbody.appendChild(tr);
+          }
+        };
+
+        const updateTable = () => {
+          const rows = Array.from(tbody.querySelectorAll("tr"));
+          const t = nowMs();
+          for (const tr of rows) {
+            const type = tr.dataset.eventType || "";
+            const count = state.counts.get(type) || 0;
+            const lastAt = state.lastAt.get(type) || 0;
+            const countEl = tr.querySelector('[data-field="count"]');
+            const lastEl = tr.querySelector('[data-field="last"]');
+            if (countEl) countEl.textContent = String(count);
+            if (lastEl) lastEl.textContent = lastAt ? `${fmtMs(t - lastAt)} ago` : "never";
+          }
+        };
+
+        const snippetFor = (type) => {
+          if (type === "wheel") {
+            return `// Trackpad gestures often arrive as wheel events.
+window.addEventListener("wheel", (e) => {
+  const dx = e.deltaX;
+  const dy = e.deltaY;
+
+  // Pinch-to-zoom on macOS Chrome often sets ctrlKey=true.
+  if (e.ctrlKey) {
+    console.log("trackpad pinch/zoom", { dx, dy, deltaMode: e.deltaMode });
+    return;
+  }
+
+  const horiz = Math.abs(dx) > Math.abs(dy) * 1.2;
+  if (horiz && Math.abs(dx) > 6) {
+    console.log("two-finger horizontal swipe", dx > 0 ? "right" : "left", { dx, dy });
+    return;
+  }
+
+  if (Math.abs(dy) > 6) {
+    console.log("two-finger vertical scroll", dy > 0 ? "down" : "up", { dx, dy });
+  }
+}, { capture: true, passive: true });`;
+          }
+          if (type === "touchstart" || type === "touchmove" || type === "touchend") {
+            return `// Touch swipe/pinch via Touch Events (mobile Safari, etc.)
+const el = document.getElementById("surface");
+
+el.addEventListener("touchstart", (e) => {
+  console.log("touchstart", e.touches.length);
+}, { passive: true });
+
+el.addEventListener("touchmove", (e) => {
+  // If you need preventDefault() here, set passive:false.
+  console.log("touchmove", e.touches.length);
+}, { passive: true });
+
+el.addEventListener("touchend", (e) => {
+  console.log("touchend", e.changedTouches.length);
+}, { passive: true });`;
+          }
+          if (type === "gesturestart" || type === "gesturechange" || type === "gestureend") {
+            return `// iOS Safari (and some WebKit) "gesture*" events for pinch/rotate.
+window.addEventListener("gesturechange", (e) => {
+  console.log("gesturechange", { scale: e.scale, rotation: e.rotation });
+}, { capture: true });`;
+          }
+          if (type.startsWith("pointer")) {
+            return `// Pointer Events (mouse/touch/pen)
+const el = document.getElementById("surface");
+
+el.addEventListener("pointerdown", (e) => {
+  console.log("pointerdown", { pointerType: e.pointerType, buttons: e.buttons, x: e.clientX, y: e.clientY });
+});
+
+el.addEventListener("pointermove", (e) => {
+  if (e.buttons) console.log("pointermove (drag)", { x: e.clientX, y: e.clientY });
+});`;
+          }
+          return `// Listening to "${type}"
+window.addEventListener("${type}", (e) => {
+  console.log("${type}", e);
+}, { capture: true });`;
+        };
+
+        const count = (type) => {
+          state.counts.set(type, (state.counts.get(type) || 0) + 1);
+          state.lastAt.set(type, nowMs());
+        };
+
+        const isNoisy = (type) => {
+          const def = EVENT_DEFS.find((d) => d.type === type);
+          return Boolean(def?.noisy);
+        };
+
+        const allowLog = (type) => {
+          if (state.includeMoves) return true;
+          if (!isNoisy(type)) return true;
+          // Throttle noisy events even if includeMoves is enabled (avoid megaspam).
+          const t = nowMs();
+          const prev = state.lastNoisyAt.get(type) || 0;
+          if (t - prev < NOISY_THROTTLE_MS) return false;
+          state.lastNoisyAt.set(type, t);
+          return true;
+        };
+
+        const recognizeWheel = (e) => {
+          const dx = Number(e.deltaX || 0);
+          const dy = Number(e.deltaY || 0);
+
+          if (e.ctrlKey) {
+            const direction = dy === 0 ? "" : dy > 0 ? "zoom out" : "zoom in";
+            return { name: "trackpad pinch/zoom", level: "warn", details: direction || "wheel+ctrlKey" };
+          }
+
+          const absX = Math.abs(dx);
+          const absY = Math.abs(dy);
+          if (absX > absY * 1.2 && absX > 6) {
+            return { name: "two-finger horizontal", level: "good", details: dx > 0 ? "right" : "left" };
+          }
+          if (absY > 6) {
+            return { name: "two-finger vertical", level: "good", details: dy > 0 ? "down" : "up" };
+          }
+          if (absX > 0.5 || absY > 0.5) {
+            return { name: "wheel", level: "warn", details: `dx=${dx.toFixed(1)} dy=${dy.toFixed(1)}` };
+          }
+          return null;
+        };
+
+        const dist = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+        const angle = (a, b) => Math.atan2(b.clientY - a.clientY, b.clientX - a.clientX);
+
+        const recognizeTouch = (type, e) => {
+          if (type === "touchstart") {
+            const t = e.touches && e.touches[0];
+            if (t) {
+              touch.active = true;
+              touch.startX = t.clientX;
+              touch.startY = t.clientY;
+              touch.lastX = t.clientX;
+              touch.lastY = t.clientY;
+              touch.startedMulti = false;
+            }
+            if (e.touches && e.touches.length === 2) {
+              const a = e.touches[0];
+              const b = e.touches[1];
+              touch.startDist = dist(a, b);
+              touch.startAngle = angle(a, b);
+              touch.startedMulti = true;
+              return { name: "pinch/rotate start", level: "warn", details: "2 touches" };
+            }
+            return { name: "touch start", level: "warn", details: `${(e.touches && e.touches.length) || 0} touch(es)` };
+          }
+
+          if (type === "touchmove") {
+            if (e.touches && e.touches.length === 2) {
+              const a = e.touches[0];
+              const b = e.touches[1];
+              const d0 = touch.startDist || dist(a, b);
+              const d = dist(a, b);
+              const scale = d0 ? d / d0 : 1;
+              const a0 = touch.startAngle || angle(a, b);
+              const rot = (angle(a, b) - a0) * (180 / Math.PI);
+              return { name: "pinch/rotate", level: "good", details: `scale=${scale.toFixed(2)} rot=${rot.toFixed(0)}deg` };
+            }
+
+            const t = e.touches && e.touches[0];
+            if (!t) return null;
+            touch.lastX = t.clientX;
+            touch.lastY = t.clientY;
+            const dx = touch.lastX - touch.startX;
+            const dy = touch.lastY - touch.startY;
+            return { name: "touch drag", level: "warn", details: `dx=${dx.toFixed(0)} dy=${dy.toFixed(0)}` };
+          }
+
+          if (type === "touchend" || type === "touchcancel") {
+            if (!touch.active) return null;
+            touch.active = false;
+            const dx = touch.lastX - touch.startX;
+            const dy = touch.lastY - touch.startY;
+            const absX = Math.abs(dx);
+            const absY = Math.abs(dy);
+            if (absX > absY && absX > 60) {
+              return { name: "swipe", level: "good", details: dx > 0 ? "right" : "left" };
+            }
+            if (absY > absX && absY > 60) {
+              return { name: "swipe", level: "good", details: dy > 0 ? "down" : "up" };
+            }
+            return { name: type === "touchcancel" ? "touch cancel" : "touch end", level: "warn", details: "" };
+          }
+
+          return null;
+        };
+
+        const recognizeGestureEvent = (type, e) => {
+          const scale = typeof e.scale === "number" ? e.scale : null;
+          const rotation = typeof e.rotation === "number" ? e.rotation : null;
+          if (type === "gesturestart") return { name: "gesture start", level: "warn", details: "" };
+          if (type === "gestureend") return { name: "gesture end", level: "warn", details: "" };
+          if (type === "gesturechange") {
+            const bits = [];
+            if (scale !== null) bits.push(`scale=${scale.toFixed(2)}`);
+            if (rotation !== null) bits.push(`rot=${rotation.toFixed(0)}deg`);
+            return { name: "gesture change", level: "good", details: bits.join(" ") };
+          }
+          return null;
+        };
+
+        const formatDetails = (type, e) => {
+          if (type === "wheel") {
+            const dx = Number(e.deltaX || 0);
+            const dy = Number(e.deltaY || 0);
+            const mode = Number.isFinite(e.deltaMode) ? e.deltaMode : 0;
+            return `dx=${dx.toFixed(1)} dy=${dy.toFixed(1)} mode=${mode} ctrl=${Boolean(e.ctrlKey)} shift=${Boolean(e.shiftKey)}`;
+          }
+          if (type.startsWith("pointer")) {
+            const pt = e.pointerType || "";
+            const btn = Number.isFinite(e.buttons) ? e.buttons : 0;
+            return `pointerType=${pt} buttons=${btn} x=${Math.round(e.clientX)} y=${Math.round(e.clientY)}`;
+          }
+          if (type.startsWith("touch")) {
+            const t = (e.touches && e.touches.length) || 0;
+            const c = (e.changedTouches && e.changedTouches.length) || 0;
+            return `touches=${t} changed=${c}`;
+          }
+          if (type.startsWith("gesture")) {
+            const s = typeof e.scale === "number" ? e.scale.toFixed(2) : "?";
+            const r = typeof e.rotation === "number" ? Math.round(e.rotation) : "?";
+            return `scale=${s} rot=${r}deg`;
+          }
+          if (type === "keydown" || type === "keyup") {
+            const key = (e.key || "").toString();
+            const code = (e.code || "").toString();
+            return `${key ? `key=${JSON.stringify(key)}` : ""}${code ? ` code=${code}` : ""}`.trim();
+          }
+          return "";
+        };
+
+        const maybePreventDefault = (type, e) => {
+          if (!state.preventDefault) return;
+          if (type === "wheel" || type === "touchmove" || type.startsWith("gesture")) {
+            try {
+              e.preventDefault();
+            } catch {
+              // ignore
+            }
+          }
+        };
+
+        const handleEvent = (type, e) => {
+          maybePreventDefault(type, e);
+          count(type);
+
+          const t = nowMs();
+          const age = t - state.startedAt;
+          const target = safeNodeLabel(e.target);
+          const details = formatDetails(type, e);
+
+          lastEventEl.textContent = `Last: ${type} on ${target}`;
+          snippetEl.textContent = snippetFor(type);
+
+          let recognized = null;
+          if (type === "wheel") recognized = recognizeWheel(e);
+          else if (type.startsWith("touch")) recognized = recognizeTouch(type, e);
+          else if (type.startsWith("gesture")) recognized = recognizeGestureEvent(type, e);
+
+          if (recognized) setActive(recognized.name, recognized.level, recognized.details);
+
+          if (allowLog(type)) {
+            const line = `[+${fmtMs(age)}] ${type} target=${target}${details ? " " + details : ""}`;
+            appendLog(line);
+          }
+
+          updateTable();
+        };
+
+        let detach = () => {};
+        const attach = () => {
+          detach();
+          const scope = state.scope;
+          const target = scope === "surface" ? surface : window;
+          const capture = true;
+
+          const listeners = [];
+          for (const def of EVENT_DEFS) {
+            if (!state.includeMoves && def.noisy) continue;
+            const type = def.type;
+            const handler = (e) => handleEvent(type, e);
+            const opts =
+              type === "wheel" || type.startsWith("touch") || type.startsWith("gesture")
+                ? { capture, passive: false }
+                : { capture };
+            try {
+              target.addEventListener(type, handler, opts);
+              listeners.push({ type, handler, opts });
+            } catch {
+              // ignore
+            }
+          }
+
+          detach = () => {
+            for (const l of listeners) {
+              try {
+                target.removeEventListener(l.type, l.handler, l.opts);
+              } catch {
+                // ignore
+              }
+            }
+          };
+
+          appendLog(`[setup] listening on ${scope === "surface" ? "#surface" : "window"} (capture)`);
+        };
+
+        const setScopeFromUi = () => {
+          const checked = document.querySelector('input[name="scope"]:checked');
+          const value = checked ? String(checked.value || "").trim() : "window";
+          state.scope = value === "surface" ? "surface" : "window";
+          attach();
+        };
+
+        const reset = () => {
+          state.counts.clear();
+          state.lastAt.clear();
+          state.lastNoisyAt.clear();
+          state.startedAt = nowMs();
+          logEl.textContent = "";
+          activeEl.textContent = "Active: idle";
+          activeEl.dataset.level = "warn";
+          lastEventEl.textContent = "Last: (none)";
+          snippetEl.textContent = snippetFor("wheel");
+          ensureTableRows();
+          updateTable();
+          appendLog("[setup] cleared");
+        };
+
+        updateCapabilities();
+        ensureTableRows();
+        updateTable();
+        snippetEl.textContent = snippetFor("wheel");
+
+        surface.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        });
+
+        document.addEventListener("change", (e) => {
+          const target = e.target;
+          if (!(target instanceof HTMLInputElement)) return;
+          if (target.name === "scope") setScopeFromUi();
+        });
+
+        includeMovesEl.addEventListener("change", () => {
+          state.includeMoves = Boolean(includeMovesEl.checked);
+          attach();
+        });
+
+        preventDefaultEl.addEventListener("change", () => {
+          state.preventDefault = Boolean(preventDefaultEl.checked);
+          appendLog(`[setup] preventDefault=${state.preventDefault ? "on" : "off"}`);
+        });
+
+        clearBtn.addEventListener("click", () => reset());
+
+        surface.addEventListener("pointerdown", () => {
+          try {
+            surface.focus({ preventScroll: true });
+          } catch {
+            surface.focus();
+          }
+        });
+
+        // Keep the observed-events "Last" age values fresh even if no new events occur.
+        setInterval(updateTable, 250);
+
+        setScopeFromUi();
+      })();
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Browser TTS Demo</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+        background: #f6f7fb;
+        color: #1d2430;
+      }
+      body {
+        margin: 0;
+        padding: 32px;
+      }
+      .wrap {
+        max-width: 880px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 12px 30px rgba(17, 24, 39, 0.12);
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 26px;
+      }
+      p {
+        line-height: 1.6;
+      }
+      .controls {
+        display: grid;
+        gap: 12px;
+        margin: 20px 0 16px;
+        padding: 16px;
+        border-radius: 12px;
+        background: #f1f3f9;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+      label {
+        display: inline-flex;
+        flex-direction: column;
+        font-size: 12px;
+        gap: 4px;
+      }
+      select,
+      input[type="range"] {
+        min-width: 220px;
+      }
+      textarea,
+      input[type="text"] {
+        min-width: 220px;
+        max-width: 100%;
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        font-size: 14px;
+      }
+      textarea {
+        resize: vertical;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        background: rgba(17, 24, 39, 0.06);
+        padding: 2px 6px;
+        border-radius: 6px;
+      }
+      button {
+        border: none;
+        background: #2456d6;
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: #6c7a95;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .status {
+        font-size: 12px;
+        color: #4b5563;
+      }
+      .sample {
+        margin-top: 12px;
+        padding-top: 8px;
+        border-top: 1px solid #e5e7eb;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Browser TTS Demo</h1>
+      <p class="status" id="status">Status: idle</p>
+
+      <div class="controls">
+        <div class="row">
+          <label>
+            Voice
+            <select id="voiceSelect"></select>
+          </label>
+          <label>
+            Rate
+            <input id="rate" type="range" min="0.5" max="2" step="0.1" value="1" />
+          </label>
+          <label>
+            Volume
+            <input id="volume" type="range" min="0" max="1" step="0.05" value="1" />
+          </label>
+          <label>
+            Pitch
+            <input id="pitch" type="range" min="0.5" max="2" step="0.1" value="1" />
+          </label>
+        </div>
+        <div class="row">
+          <button id="speakBtn">Speak Sample</button>
+          <button id="stopBtn" class="secondary">Stop</button>
+          <button id="copyBtn" class="secondary">Copy Voice List</button>
+        </div>
+        <div class="status">
+          Uses the browser’s built-in SpeechSynthesis voices (no server audio).
+        </div>
+      </div>
+
+      <div class="sample">
+        <label class="status" for="voiceList">English voices detected</label>
+        <textarea id="voiceList" rows="6" readonly></textarea>
+      </div>
+
+      <div class="controls" id="serverControls">
+        <div class="row">
+          <div class="status"><strong>Server TTS</strong></div>
+        </div>
+        <div class="row">
+          <label>
+            Engine
+            <select id="serverEngine">
+              <option value="">(default)</option>
+              <option value="piper">piper</option>
+              <option value="openai">openai</option>
+            </select>
+          </label>
+          <label>
+            Voice (optional)
+            <input id="serverVoice" type="text" placeholder="coral" />
+          </label>
+          <label>
+            Model (optional)
+            <input id="serverModel" type="text" placeholder="gpt-4o-mini-tts" />
+          </label>
+        </div>
+        <label>
+          Text
+          <textarea id="serverText" rows="4"></textarea>
+        </label>
+        <div class="row">
+          <button id="serverSpeakBtn">Synthesize + Play (Server)</button>
+          <button id="serverStopBtn" class="secondary">Stop</button>
+        </div>
+        <div class="status">Calls <code>/api/tts/synthesize</code> and plays the returned WAV (max 800 chars).</div>
+        <audio id="serverAudio" controls preload="none" style="width: 100%"></audio>
+      </div>
+
+      <div class="sample" id="consolePanel">
+        <div class="row">
+          <div class="status"><strong>Console output</strong></div>
+          <button id="consoleCopyBtn" class="secondary" type="button">Copy</button>
+          <button id="consoleClearBtn" class="secondary" type="button">Clear</button>
+        </div>
+        <textarea id="consoleOut" rows="8" readonly></textarea>
+      </div>
+
+      <div class="sample" id="sample">
+        <p>
+          Sultan Alp Arslan (r. 1063–1072) was the second sultan of the Great Seljuk Empire.
+          A member of the Seljuk dynasty, he expanded the empire’s reach across Iran,
+          the Caucasus, and toward Anatolia, strengthening Seljuk power through both
+          diplomacy and military campaigns.
+        </p>
+        <p>
+          His most famous victory came in 1071 at the Battle of Manzikert, where his forces
+          defeated the Byzantine army and captured Emperor Romanos IV Diogenes. The battle
+          destabilized Byzantine control in Anatolia and opened the region to increased
+          Turkic settlement and influence.
+        </p>
+        <p>
+          Alp Arslan died in 1072 and was succeeded by his son Malik Shah I, under whom
+          the Seljuk Empire reached its greatest territorial and administrative strength.
+          His reign is remembered as a pivotal moment in the political transformation of
+          the medieval Middle East and Anatolia.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      const voiceSelect = document.getElementById("voiceSelect");
+      const rateEl = document.getElementById("rate");
+      const volumeEl = document.getElementById("volume");
+      const pitchEl = document.getElementById("pitch");
+      const speakBtn = document.getElementById("speakBtn");
+      const stopBtn = document.getElementById("stopBtn");
+      const copyBtn = document.getElementById("copyBtn");
+      const statusEl = document.getElementById("status");
+      const sample = document.getElementById("sample");
+      const voiceList = document.getElementById("voiceList");
+      const serverEngine = document.getElementById("serverEngine");
+      const serverVoice = document.getElementById("serverVoice");
+      const serverModel = document.getElementById("serverModel");
+      const serverText = document.getElementById("serverText");
+      const serverSpeakBtn = document.getElementById("serverSpeakBtn");
+      const serverStopBtn = document.getElementById("serverStopBtn");
+      const serverAudio = document.getElementById("serverAudio");
+      const consoleOut = document.getElementById("consoleOut");
+      const consoleCopyBtn = document.getElementById("consoleCopyBtn");
+      const consoleClearBtn = document.getElementById("consoleClearBtn");
+
+      let serverAudioCtx = null;
+      let serverSource = null;
+      let serverBlobUrl = "";
+      let serverInFlight = null;
+
+      function setStatus(text) {
+        statusEl.textContent = `Status: ${text}`;
+      }
+
+      const LOG_MAX_LINES = 220;
+      const logLines = [];
+
+      function safeJson(data) {
+        if (data === undefined) return "";
+        try {
+          const raw = JSON.stringify(data);
+          if (!raw) return "";
+          return raw.length > 2000 ? raw.slice(0, 2000) + "…" : raw;
+        } catch {
+          return String(data);
+        }
+      }
+
+      function appendLog(level, message, data) {
+        const ts = new Date().toISOString();
+        const suffix = data === undefined ? "" : ` ${safeJson(data)}`;
+        const line = `${ts} [${level}] ${message}${suffix}`;
+        logLines.push(line);
+        if (logLines.length > LOG_MAX_LINES) {
+          logLines.splice(0, logLines.length - LOG_MAX_LINES);
+        }
+        if (consoleOut) {
+          consoleOut.value = logLines.join("\n");
+          consoleOut.scrollTop = consoleOut.scrollHeight;
+        }
+        try {
+          const fn =
+            level === "error"
+              ? console.error
+              : level === "warn"
+                ? console.warn
+                : console.log;
+          data === undefined ? fn(message) : fn(message, data);
+        } catch {
+          // ignore
+        }
+      }
+
+      if (consoleClearBtn) {
+        consoleClearBtn.addEventListener("click", () => {
+          logLines.length = 0;
+          if (consoleOut) consoleOut.value = "";
+          appendLog("info", "log cleared");
+        });
+      }
+
+      if (consoleCopyBtn) {
+        consoleCopyBtn.addEventListener("click", async () => {
+          const text = String(consoleOut?.value || "");
+          if (!text) {
+            appendLog("warn", "nothing to copy");
+            return;
+          }
+          try {
+            await navigator.clipboard.writeText(text);
+            appendLog("info", "log copied");
+          } catch (err) {
+            appendLog("warn", "copy failed", { error: err && err.message ? err.message : String(err) });
+          }
+        });
+      }
+
+      window.addEventListener("error", (event) => {
+        appendLog("error", "window.error", {
+          message: event?.message || "",
+          filename: event?.filename || "",
+          lineno: event?.lineno,
+          colno: event?.colno
+        });
+      });
+
+      window.addEventListener("unhandledrejection", (event) => {
+        const reason = event?.reason;
+        appendLog("error", "unhandledrejection", {
+          reason: reason && reason.message ? reason.message : String(reason)
+        });
+      });
+
+      const noveltyVoices = new Set([
+        "bad news",
+        "bahh",
+        "bells",
+        "boing",
+        "bubbles",
+        "cellos",
+        "fred",
+        "good news",
+        "jester",
+        "junior",
+        "organ",
+        "ralph",
+        "rocko",
+        "superstar",
+        "trinoids",
+        "whisper",
+        "wobble",
+        "zarvox",
+      ]);
+
+      function getEnglishVoices() {
+        return window.speechSynthesis
+          .getVoices()
+          .filter((voice) => String(voice.lang || "").toLowerCase().startsWith("en"))
+          .filter((voice) => !noveltyVoices.has(String(voice.name || "").toLowerCase()));
+      }
+
+      function pickDefaultIndex(voices) {
+        if (!voices.length) return 0;
+        const preferred = [
+          { lang: "en-gb", nameIncludes: "google" },
+          { lang: "en-gb", nameIncludes: "uk" },
+          { lang: "en-us", nameIncludes: "google" },
+        ];
+        const normalized = voices.map((voice) => ({
+          voice,
+          name: String(voice.name || "").toLowerCase(),
+          lang: String(voice.lang || "").toLowerCase(),
+        }));
+        for (const pref of preferred) {
+          const idx = normalized.findIndex(
+            (item) =>
+              item.lang === pref.lang &&
+              (!pref.nameIncludes || item.name.includes(pref.nameIncludes))
+          );
+          if (idx >= 0) return idx;
+        }
+        return 0;
+      }
+
+      function populateVoices() {
+        const voices = getEnglishVoices();
+        voiceSelect.innerHTML = "";
+        voices.forEach((voice, idx) => {
+          const opt = document.createElement("option");
+          opt.value = String(idx);
+          opt.textContent = `${voice.name} (${voice.lang})`;
+          voiceSelect.appendChild(opt);
+        });
+        if (!voices.length) {
+          const opt = document.createElement("option");
+          opt.textContent = "No English voices available";
+          voiceSelect.appendChild(opt);
+        }
+        voiceSelect.value = String(pickDefaultIndex(voices));
+        voiceList.value = formatVoiceList(voices);
+      }
+
+      function formatVoiceList(voices) {
+        if (!voices.length) return "No English voices available.";
+        return voices
+          .map((voice, idx) => {
+            const flags = [];
+            if (voice.default) flags.push("default");
+            if (voice.localService) flags.push("local");
+            const suffix = flags.length ? ` [${flags.join(", ")}]` : "";
+            return `${idx + 1}. ${voice.name} (${voice.lang})${suffix}`;
+          })
+          .join("\\n");
+      }
+
+      function speakSample() {
+        const voices = getEnglishVoices();
+        if (!voices.length) {
+          setStatus("no English voices available");
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const voice = voices[Number(voiceSelect.value) || 0];
+        const paragraphs = Array.from(sample.querySelectorAll("p")).map((p) => p.textContent || "");
+        paragraphs.forEach((text, idx) => {
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.voice = voice;
+          utter.rate = Number(rateEl.value);
+          utter.volume = Number(volumeEl.value);
+          utter.pitch = Number(pitchEl.value);
+          utter.onstart = () => setStatus(`speaking paragraph ${idx + 1}`);
+          utter.onend = () => setStatus("idle");
+          window.speechSynthesis.speak(utter);
+        });
+      }
+
+      speakBtn.addEventListener("click", () => speakSample());
+      stopBtn.addEventListener("click", () => {
+        window.speechSynthesis.cancel();
+        setStatus("stopped");
+      });
+      copyBtn.addEventListener("click", async () => {
+        const voices = getEnglishVoices();
+        const text = formatVoiceList(voices);
+        voiceList.value = text;
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+            setStatus("voice list copied");
+            return;
+          }
+        } catch {
+          // fall back to selection
+        }
+        voiceList.focus();
+        voiceList.select();
+        setStatus("select and copy the list");
+      });
+
+      populateVoices();
+      if ("onvoiceschanged" in window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = populateVoices;
+      }
+
+      function decodeAudioDataCompat(ctx, arrayBuffer) {
+        return new Promise((resolve, reject) => {
+          let settled = false;
+          const onResolve = (v) => {
+            if (settled) return;
+            settled = true;
+            resolve(v);
+          };
+          const onReject = (e) => {
+            if (settled) return;
+            settled = true;
+            reject(e);
+          };
+          try {
+            const maybe = ctx.decodeAudioData(arrayBuffer, onResolve, onReject);
+            if (maybe && typeof maybe.then === "function") {
+              maybe.then(onResolve, onReject);
+            }
+          } catch (err) {
+            onReject(err);
+          }
+        });
+      }
+
+      async function ensureServerAudio() {
+        const Ctor = window.AudioContext || window.webkitAudioContext;
+        if (!Ctor) {
+          appendLog("warn", "AudioContext unavailable");
+          return null;
+        }
+        if (!serverAudioCtx) serverAudioCtx = new Ctor();
+        if (serverAudioCtx.state === "suspended") {
+          await serverAudioCtx.resume();
+          setStatus("audio resumed");
+          appendLog("info", "AudioContext resumed", { state: serverAudioCtx.state });
+        }
+        return serverAudioCtx;
+      }
+
+      function stopServerPlayback() {
+        if (serverSource) {
+          try {
+            serverSource.stop();
+          } catch {
+            // ignore
+          }
+          serverSource = null;
+        }
+        try {
+          serverAudio.pause();
+          serverAudio.currentTime = 0;
+        } catch {
+          // ignore
+        }
+      }
+
+      async function synthesizeServer() {
+        const text = String(serverText.value || "").trim();
+        if (!text) {
+          setStatus("server text is empty");
+          return;
+        }
+        if (text.length > 800) {
+          setStatus("server text too long (max 800 chars)");
+          appendLog("warn", "tts text too long", { chars: text.length, max: 800 });
+          return;
+        }
+
+        await ensureServerAudio().catch(() => null);
+
+        if (serverInFlight) {
+          try {
+            serverInFlight.abort();
+          } catch {
+            // ignore
+          }
+        }
+        serverInFlight = new AbortController();
+
+        serverSpeakBtn.disabled = true;
+        stopServerPlayback();
+        setStatus("server synth...");
+        try {
+          const payload = { text };
+          const engine = String(serverEngine.value || "").trim();
+          const voice = String(serverVoice.value || "").trim();
+          const model = String(serverModel.value || "").trim();
+          if (engine) payload.engine = engine;
+          if (voice) payload.voice = voice;
+          if (model) payload.model = model;
+          appendLog("info", "tts.synthesize request", {
+            engine: payload.engine || "(default)",
+            voice: payload.voice || "",
+            model: payload.model || "",
+            chars: text.length
+          });
+
+          const resp = await fetch("/api/tts/synthesize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            signal: serverInFlight.signal
+          });
+
+          if (!resp.ok) {
+            const errText = await resp.text().catch(() => "");
+            throw new Error(`HTTP ${resp.status}: ${errText || resp.statusText}`);
+          }
+
+          const engineUsed = resp.headers.get("X-Console-TTS-Engine") || "";
+          const sampleRateRaw = resp.headers.get("X-Console-TTS-Sample-Rate") || "";
+          const requestId = resp.headers.get("X-Console-TTS-Request-Id") || "";
+          const sampleRate = Number(sampleRateRaw) || 0;
+          appendLog("info", "tts.synthesize response", {
+            status: resp.status,
+            requestId,
+            engine: engineUsed,
+            sampleRate: sampleRate || undefined
+          });
+
+          const blob = await resp.blob();
+          appendLog("info", "tts.synthesize audio", { bytes: blob.size, type: blob.type || "" });
+          if (sampleRate > 0 && blob.size > 44) {
+            const pcmBytes = blob.size - 44;
+            const durationMs = Math.round((pcmBytes / 2 / sampleRate) * 1000);
+            appendLog("info", "tts.synthesize duration", { durationMs });
+          }
+          if (serverBlobUrl) URL.revokeObjectURL(serverBlobUrl);
+          serverBlobUrl = URL.createObjectURL(blob);
+          serverAudio.src = serverBlobUrl;
+
+          const arrayBuffer = await blob.arrayBuffer();
+          const ctx = await ensureServerAudio().catch(() => null);
+          if (ctx && typeof ctx.createBufferSource === "function") {
+            try {
+              const buffer = await decodeAudioDataCompat(ctx, arrayBuffer.slice(0));
+              const source = ctx.createBufferSource();
+              source.buffer = buffer;
+              source.connect(ctx.destination);
+              source.start();
+              serverSource = source;
+              source.onended = () => {
+                if (serverSource === source) serverSource = null;
+                setStatus("idle");
+              };
+              setStatus(`server playing${engineUsed ? ` (${engineUsed})` : ""}`);
+              appendLog("info", "tts.play", { method: "webaudio", requestId });
+              return;
+            } catch (err) {
+              appendLog("warn", "webaudio decode/play failed; falling back to <audio>", {
+                error: err && err.message ? err.message : String(err)
+              });
+            }
+          }
+
+          // Fallback to <audio> element playback if WebAudio isn't available.
+          try {
+            await serverAudio.play();
+            setStatus(`server playing${engineUsed ? ` (${engineUsed})` : ""}`);
+            appendLog("info", "tts.play", { method: "html_audio", requestId });
+          } catch (err) {
+            console.warn("audio.play() failed; use the audio controls:", err);
+            setStatus("server ready (tap play)");
+            appendLog("warn", "audio.play blocked; tap play", {
+              error: err && err.message ? err.message : String(err)
+            });
+          }
+        } catch (err) {
+          if (err && err.name === "AbortError") {
+            setStatus("server cancelled");
+            appendLog("warn", "tts.synthesize cancelled");
+            return;
+          }
+          console.error(err);
+          setStatus(`server error: ${err && err.message ? err.message : String(err)}`);
+          appendLog("error", "tts.synthesize failed", {
+            error: err && err.message ? err.message : String(err)
+          });
+        } finally {
+          serverSpeakBtn.disabled = false;
+        }
+      }
+
+      serverSpeakBtn.addEventListener("click", () => synthesizeServer());
+      serverStopBtn.addEventListener("click", () => {
+        if (serverInFlight) {
+          try {
+            serverInFlight.abort();
+          } catch {
+            // ignore
+          }
+        }
+        stopServerPlayback();
+        setStatus("server stopped");
+      });
+
+      serverText.value =
+        "Hello from server TTS. If you hear this, /api/tts/synthesize is working.";
+
+      appendLog("info", "page ready", {
+        path: window.location?.pathname || "",
+        ua: navigator.userAgent,
+        audioContext: Boolean(window.AudioContext || window.webkitAudioContext),
+        speechSynthesis: Boolean(window.speechSynthesis),
+      });
+    </script>
+  </body>
+</html>

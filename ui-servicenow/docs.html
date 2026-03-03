@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Xterm.js Customizations</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@500;600;700&family=Literata:wght@400;600;700&display=swap');
+
+    :root {
+      color-scheme: dark;
+      --bg: #0b0f14;
+      --bg-soft: #101824;
+      --panel: #121b27;
+      --text: #e6edf3;
+      --muted: #9bb0c6;
+      --accent: #7fb1ff;
+      --border: rgba(255, 255, 255, 0.08);
+      --code-bg: #0c121a;
+      --code-text: #d6e6ff;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 900px at 10% -10%, #152235 0%, rgba(11, 15, 20, 0) 55%),
+                  radial-gradient(900px 700px at 110% 0%, #0f2a1f 0%, rgba(11, 15, 20, 0) 60%),
+                  var(--bg);
+      color: var(--text);
+      font-family: 'Literata', 'Iowan Old Style', 'Charter', 'Palatino Linotype', 'Book Antiqua', serif;
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    header {
+      padding: 20px 18px 10px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 15, 22, 0.7);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header .title {
+      font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: 0.01em;
+      margin: 0 0 4px;
+    }
+
+    header .subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0 0 10px;
+    }
+
+    header .links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+      font-size: 0.9rem;
+    }
+
+    main {
+      padding: 24px 18px 64px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .toc {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin: 0 0 24px;
+      box-shadow: 0 12px 28px var(--shadow);
+      font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+    }
+
+    .toc ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 10px 0 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .toc a {
+      color: var(--text);
+      font-weight: 500;
+      opacity: 0.85;
+    }
+
+    h1, h2, h3 {
+      font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+      line-height: 1.25;
+      margin-top: 2rem;
+    }
+
+    h1 { font-size: 1.8rem; margin-top: 1rem; }
+    h2 { font-size: 1.4rem; }
+    h3 { font-size: 1.12rem; }
+
+    p, li { font-size: 1rem; }
+
+    ul {
+      padding-left: 1.2rem;
+      margin: 0.6rem 0 1rem;
+    }
+
+    code {
+      font-family: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
+      background: rgba(127, 177, 255, 0.12);
+      color: var(--code-text);
+      padding: 0.15rem 0.35rem;
+      border-radius: 6px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      font-size: 0.9rem;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+    }
+
+    .doc {
+      background: rgba(12, 17, 24, 0.55);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px 20px 26px;
+      box-shadow: 0 16px 36px var(--shadow);
+    }
+
+    .doc blockquote {
+      margin: 1rem 0;
+      padding: 0.8rem 1rem;
+      border-left: 3px solid var(--accent);
+      background: rgba(127, 177, 255, 0.08);
+    }
+
+    @media (max-width: 640px) {
+      header { position: relative; }
+      header .title { font-size: 1.2rem; }
+      main { padding: 18px 14px 50px; }
+      .doc { padding: 18px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">xterm.js Customizations and Hooks</div>
+    <div class="subtitle">Local reference for console-terminal (xterm.js v6.0.0)</div>
+    <div class="links">
+      <a href="./">Back to Console</a>
+      <a href="browser_tts.html">Browser TTS Demo</a>
+      <a href="https://xtermjs.org/" target="_blank" rel="noreferrer">xterm.js Home</a>
+    </div>
+  </header>
+  <main>
+    <nav class="toc">
+      <strong>Contents</strong>
+      <div class="toc">
+<ul>
+<li><a href="#xtermjs-customizations-and-hooks-local-v600">xterm.js Customizations and Hooks (Local v6.0.0)</a><ul>
+<li><a href="#useful-links">Useful Links</a></li>
+<li><a href="#core-customization-surface">Core Customization Surface</a><ul>
+<li><a href="#initialization-options-iterminaloptions">Initialization Options (ITerminalOptions)</a></li>
+<li><a href="#init-only-options-iterminalinitonlyoptions">Init-Only Options (ITerminalInitOnlyOptions)</a></li>
+<li><a href="#theme-itheme">Theme (ITheme)</a></li>
+<li><a href="#overview-ruler-ioverviewruleroptions">Overview Ruler (IOverviewRulerOptions)</a></li>
+<li><a href="#window-manipulation-iwindowoptions">Window Manipulation (IWindowOptions)</a></li>
+</ul>
+</li>
+<li><a href="#hooks-and-events">Hooks and Events</a><ul>
+<li><a href="#terminal-events">Terminal Events</a></li>
+<li><a href="#input-intercepts">Input Intercepts</a></li>
+<li><a href="#parser-hooks-escape-sequences">Parser Hooks (Escape Sequences)</a></li>
+<li><a href="#link-handling-hooks">Link Handling Hooks</a></li>
+</ul>
+</li>
+<li><a href="#decorations-and-markers">Decorations and Markers</a></li>
+<li><a href="#selection-apis">Selection APIs</a></li>
+<li><a href="#buffer-inspection-read-access">Buffer Inspection (Read Access)</a></li>
+<li><a href="#unicode-and-rendering-hooks-experimental">Unicode and Rendering Hooks (Experimental)</a></li>
+<li><a href="#addons-installed-in-this-repo">Addons Installed in This Repo</a><ul>
+<li><a href="#fitaddon-xtermaddon-fit">FitAddon (@xterm/addon-fit)</a></li>
+<li><a href="#serializeaddon-xtermaddon-serialize">SerializeAddon (@xterm/addon-serialize)</a></li>
+<li><a href="#weblinksaddon-xtermaddon-web-links">WebLinksAddon (@xterm/addon-web-links)</a></li>
+</ul>
+</li>
+<li><a href="#terminal-api-surface-you-can-use-for-custom-behavior">Terminal API Surface You Can Use for Custom Behavior</a></li>
+<li><a href="#current-usage-in-console-terminal">Current Usage in console-terminal</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+    </nav>
+    <article class="doc">
+      <h1 id="xtermjs-customizations-and-hooks-local-v600">xterm.js Customizations and Hooks (Local v6.0.0)</h1>
+<p>Scope: This document is derived from the locally installed <code>@xterm/xterm</code> typings in this repo (<code>node_modules/@xterm/xterm/typings/xterm.d.ts</code>) and the installed addons. It reflects the API surface for <strong>xterm.js v6.0.0</strong> as used by <code>console-terminal</code>.</p>
+<p>Where it is used in this repo:
+- <code>console-terminal/ui/src/TerminalView.tsx</code> creates the terminal and loads addons.</p>
+<h2 id="useful-links">Useful Links</h2>
+<ul>
+<li>xterm.js docs: https://xtermjs.org/docs/</li>
+<li>xterm.js GitHub: https://github.com/xtermjs/xterm.js</li>
+<li>FitAddon: https://github.com/xtermjs/xterm.js/tree/master/addons/xterm-addon-fit</li>
+<li>SerializeAddon: https://github.com/xtermjs/xterm.js/tree/master/addons/xterm-addon-serialize</li>
+<li>WebLinksAddon: https://github.com/xtermjs/xterm.js/tree/master/addons/xterm-addon-web-links</li>
+</ul>
+<h2 id="core-customization-surface">Core Customization Surface</h2>
+<h3 id="initialization-options-iterminaloptions">Initialization Options (ITerminalOptions)</h3>
+<p>These can be passed to the <code>Terminal</code> constructor and most can be updated at runtime via <code>terminal.options</code>.</p>
+<ul>
+<li><code>allowProposedApi</code>: Enable experimental/proposed APIs.</li>
+<li><code>allowTransparency</code>: Allow non-opaque background. Must be set before <code>open()</code>.</li>
+<li><code>altClickMovesCursor</code>: Alt+click moves the cursor.</li>
+<li><code>convertEol</code>: Convert <code>\n</code> into <code>\r\n</code> when writing.</li>
+<li><code>cursorBlink</code>: Blink the cursor.</li>
+<li><code>cursorStyle</code>: <code>block | underline | bar</code>.</li>
+<li><code>cursorWidth</code>: CSS pixels when cursorStyle is <code>bar</code>.</li>
+<li><code>cursorInactiveStyle</code>: <code>outline | block | bar | underline | none</code>.</li>
+<li><code>customGlyphs</code>: Draw custom glyphs for box/block characters.</li>
+<li><code>disableStdin</code>: Disable input.</li>
+<li><code>documentOverride</code>: Provide a custom <code>Document</code> reference.</li>
+<li><code>drawBoldTextInBrightColors</code>: Render bold as bright colors.</li>
+<li><code>fastScrollSensitivity</code>: Scroll multiplier when Alt is held.</li>
+<li><code>fontSize</code>: Font size in pixels.</li>
+<li><code>fontFamily</code>: Font family stack.</li>
+<li><code>fontWeight</code>: Font weight for normal text.</li>
+<li><code>fontWeightBold</code>: Font weight for bold text.</li>
+<li><code>ignoreBracketedPasteMode</code>: Always paste without bracketed sequences.</li>
+<li><code>letterSpacing</code>: Character spacing in pixels.</li>
+<li><code>lineHeight</code>: Line height multiplier.</li>
+<li><code>linkHandler</code>: Custom OSC-8 link handler.</li>
+<li><code>logLevel</code>: <code>trace | debug | info | warn | error | off</code>.</li>
+<li><code>logger</code>: Custom logger object.</li>
+<li><code>macOptionIsMeta</code>: Treat Option as Meta on macOS.</li>
+<li><code>macOptionClickForcesSelection</code>: Force selection even when mouse tracking is on.</li>
+<li><code>minimumContrastRatio</code>: Enforce minimum text contrast.</li>
+<li><code>reflowCursorLine</code>: Reflow the cursor line on resize.</li>
+<li><code>rescaleOverlappingGlyphs</code>: Rescale ambiguous-width glyphs.</li>
+<li><code>rightClickSelectsWord</code>: Select word on right click.</li>
+<li><code>screenReaderMode</code>: Enable screen reader support.</li>
+<li><code>scrollback</code>: Size of scrollback buffer.</li>
+<li><code>scrollOnEraseInDisplay</code>: Push ED2 to scrollback (PuTTY behavior).</li>
+<li><code>scrollOnUserInput</code>: Auto-scroll on input.</li>
+<li><code>scrollSensitivity</code>: Scroll speed multiplier.</li>
+<li><code>smoothScrollDuration</code>: Smooth scroll duration in ms.</li>
+<li><code>tabStopWidth</code>: Tab size in spaces.</li>
+<li><code>theme</code>: Color theme object.</li>
+<li><code>windowsPty</code>: Windows PTY compatibility hints.</li>
+<li><code>wordSeparator</code>: Characters treated as word separators for selection.</li>
+<li><code>windowOptions</code>: Enable/disable window manipulation report features.</li>
+<li><code>overviewRuler</code>: Controls overview ruler display.</li>
+</ul>
+<h3 id="init-only-options-iterminalinitonlyoptions">Init-Only Options (ITerminalInitOnlyOptions)</h3>
+<p>These are set at construction time and not meant to be updated later.</p>
+<ul>
+<li><code>cols</code>: Initial columns.</li>
+<li><code>rows</code>: Initial rows.</li>
+</ul>
+<h3 id="theme-itheme">Theme (ITheme)</h3>
+<p>All theme keys are optional and can be set via <code>terminal.options.theme</code>.</p>
+<ul>
+<li><code>foreground</code></li>
+<li><code>background</code></li>
+<li><code>cursor</code></li>
+<li><code>cursorAccent</code></li>
+<li><code>selectionBackground</code></li>
+<li><code>selectionForeground</code></li>
+<li><code>selectionInactiveBackground</code></li>
+<li><code>scrollbarSliderBackground</code></li>
+<li><code>scrollbarSliderHoverBackground</code></li>
+<li><code>scrollbarSliderActiveBackground</code></li>
+<li><code>overviewRulerBorder</code></li>
+<li><code>black</code>, <code>red</code>, <code>green</code>, <code>yellow</code>, <code>blue</code>, <code>magenta</code>, <code>cyan</code>, <code>white</code></li>
+<li><code>brightBlack</code>, <code>brightRed</code>, <code>brightGreen</code>, <code>brightYellow</code>, <code>brightBlue</code>, <code>brightMagenta</code>, <code>brightCyan</code>, <code>brightWhite</code></li>
+<li><code>extendedAnsi</code> (array for 16-255)</li>
+</ul>
+<h3 id="overview-ruler-ioverviewruleroptions">Overview Ruler (IOverviewRulerOptions)</h3>
+<p>The overview ruler visualizes decorations near the scroll bar.</p>
+<ul>
+<li><code>width</code>: Enables the overview ruler when set.</li>
+<li><code>showTopBorder</code></li>
+<li><code>showBottomBorder</code></li>
+</ul>
+<h3 id="window-manipulation-iwindowoptions">Window Manipulation (IWindowOptions)</h3>
+<p>These correspond to CSI <code>t</code> sequences and are all <strong>disabled by default</strong> for security.</p>
+<ul>
+<li><code>restoreWin</code></li>
+<li><code>minimizeWin</code></li>
+<li><code>setWinPosition</code></li>
+<li><code>setWinSizePixels</code></li>
+<li><code>raiseWin</code></li>
+<li><code>lowerWin</code></li>
+<li><code>refreshWin</code></li>
+<li><code>setWinSizeChars</code></li>
+<li><code>maximizeWin</code></li>
+<li><code>fullscreenWin</code></li>
+<li><code>getWinState</code></li>
+<li><code>getWinPosition</code></li>
+<li><code>getWinSizePixels</code></li>
+<li><code>getScreenSizePixels</code></li>
+<li><code>getCellSizePixels</code></li>
+<li><code>getWinSizeChars</code></li>
+<li><code>getScreenSizeChars</code></li>
+<li><code>getIconTitle</code></li>
+<li><code>getWinTitle</code></li>
+<li><code>pushTitle</code></li>
+<li><code>popTitle</code></li>
+<li><code>setWinLines</code></li>
+</ul>
+<h2 id="hooks-and-events">Hooks and Events</h2>
+<h3 id="terminal-events">Terminal Events</h3>
+<p>All return an <code>IDisposable</code> so you can unsubscribe.</p>
+<ul>
+<li><code>onBell</code></li>
+<li><code>onBinary</code></li>
+<li><code>onCursorMove</code></li>
+<li><code>onData</code></li>
+<li><code>onKey</code></li>
+<li><code>onLineFeed</code></li>
+<li><code>onRender</code></li>
+<li><code>onWriteParsed</code></li>
+<li><code>onResize</code></li>
+<li><code>onScroll</code></li>
+<li><code>onSelectionChange</code></li>
+<li><code>onTitleChange</code></li>
+</ul>
+<h3 id="input-intercepts">Input Intercepts</h3>
+<ul>
+<li><code>attachCustomKeyEventHandler((event) =&gt; boolean)</code>: intercept key events.</li>
+<li><code>attachCustomWheelEventHandler((event) =&gt; boolean)</code>: intercept wheel events.</li>
+</ul>
+<h3 id="parser-hooks-escape-sequences">Parser Hooks (Escape Sequences)</h3>
+<p>Use <code>terminal.parser</code> to intercept or implement CSI/ESC/DCS/OSC sequences.</p>
+<ul>
+<li><code>registerCsiHandler(id, (params) =&gt; boolean | Promise&lt;boolean&gt;)</code></li>
+<li><code>registerDcsHandler(id, (data, params) =&gt; boolean | Promise&lt;boolean&gt;)</code></li>
+<li><code>registerEscHandler(id, () =&gt; boolean | Promise&lt;boolean&gt;)</code></li>
+<li><code>registerOscHandler(ident, (data) =&gt; boolean | Promise&lt;boolean&gt;)</code></li>
+</ul>
+<h3 id="link-handling-hooks">Link Handling Hooks</h3>
+<ul>
+<li><code>terminal.options.linkHandler</code>: Handle OSC-8 links.</li>
+<li><code>terminal.registerLinkProvider(...)</code>: Provide custom link detection.</li>
+<li><code>ILink</code>: supports <code>activate</code>, optional <code>hover</code> and <code>leave</code>, and <code>decorations</code>.</li>
+<li><code>ILinkDecorations</code>: <code>pointerCursor</code>, <code>underline</code>.</li>
+</ul>
+<h2 id="decorations-and-markers">Decorations and Markers</h2>
+<ul>
+<li><code>registerMarker(cursorYOffset?)</code>: Create a tracked buffer marker.</li>
+<li><code>registerDecoration(options)</code>: Overlay decorations (colors, DOM element, overview ruler markers).</li>
+<li><code>IDecoration.onRender</code>: Hook when a decoration is rendered.</li>
+<li><code>IDecoration.options</code>: Update overview ruler options.</li>
+</ul>
+<p>Decoration options (IDecorationOptions):
+- <code>marker</code>
+- <code>anchor</code>: <code>left | right</code>
+- <code>x</code>
+- <code>width</code>
+- <code>height</code>
+- <code>backgroundColor</code>
+- <code>foregroundColor</code>
+- <code>layer</code>: <code>bottom | top</code>
+- <code>overviewRulerOptions</code>: <code>color</code>, <code>position</code></p>
+<h2 id="selection-apis">Selection APIs</h2>
+<ul>
+<li><code>hasSelection()</code></li>
+<li><code>getSelection()</code></li>
+<li><code>getSelectionPosition()</code></li>
+<li><code>clearSelection()</code></li>
+<li><code>select(column, row, length)</code></li>
+<li><code>selectAll()</code></li>
+<li><code>selectLines(start, end)</code></li>
+</ul>
+<h2 id="buffer-inspection-read-access">Buffer Inspection (Read Access)</h2>
+<p>Use these to build features like search, snapshots, or analytics.</p>
+<ul>
+<li><code>terminal.buffer</code>: access <code>normal</code>, <code>alternate</code>, <code>active</code>.</li>
+<li><code>buffer.onBufferChange</code>: event when active buffer changes.</li>
+<li><code>buffer.getLine(y)</code>: returns <code>IBufferLine</code>.</li>
+<li><code>buffer.getNullCell()</code>: reuse cell object for performance.</li>
+<li><code>IBufferLine.getCell(x, cell?)</code></li>
+<li><code>IBufferLine.translateToString(trimRight?, start?, end?)</code></li>
+<li><code>IBufferCell</code> getters: <code>getChars</code>, <code>getCode</code>, <code>getWidth</code>, color modes, and style flags.</li>
+</ul>
+<h2 id="unicode-and-rendering-hooks-experimental">Unicode and Rendering Hooks (Experimental)</h2>
+<ul>
+<li><code>terminal.unicode.register(provider)</code> to add custom Unicode versions.</li>
+<li><code>terminal.unicode.versions</code> to list available versions.</li>
+<li><code>terminal.unicode.activeVersion</code> to select a version.</li>
+<li><code>registerCharacterJoiner(handler)</code> and <code>deregisterCharacterJoiner(id)</code> for advanced grapheme/ligature joins (WebGL renderer only).</li>
+<li><code>clearTextureAtlas()</code> to force a WebGL re-render when textures are corrupted.</li>
+</ul>
+<h2 id="addons-installed-in-this-repo">Addons Installed in This Repo</h2>
+<p>All addons are loaded via <code>terminal.loadAddon(addon)</code>.</p>
+<h3 id="fitaddon-xtermaddon-fit">FitAddon (<code>@xterm/addon-fit</code>)</h3>
+<ul>
+<li><code>fit()</code>: Resize terminal to the container.</li>
+<li><code>proposeDimensions()</code>: Preview target rows/cols.</li>
+</ul>
+<h3 id="serializeaddon-xtermaddon-serialize">SerializeAddon (<code>@xterm/addon-serialize</code>)</h3>
+<ul>
+<li><code>serialize(options?)</code>: Serialize buffer into a string for restore.</li>
+<li><code>serializeAsHTML(options?)</code>: Serialize to HTML for rich clipboard paste.</li>
+<li><code>ISerializeOptions</code>: <code>range</code>, <code>scrollback</code>, <code>excludeModes</code>, <code>excludeAltBuffer</code>.</li>
+<li><code>IHTMLSerializeOptions</code>: <code>scrollback</code>, <code>onlySelection</code>, <code>includeGlobalBackground</code>, <code>range</code>.</li>
+</ul>
+<h3 id="weblinksaddon-xtermaddon-web-links">WebLinksAddon (<code>@xterm/addon-web-links</code>)</h3>
+<ul>
+<li>Constructor options: <code>handler</code>, <code>hover</code>, <code>leave</code>, <code>urlRegex</code>.</li>
+</ul>
+<h2 id="terminal-api-surface-you-can-use-for-custom-behavior">Terminal API Surface You Can Use for Custom Behavior</h2>
+<ul>
+<li><code>terminal.options = { ... }</code> or <code>terminal.options.someOption = value</code>.</li>
+<li><code>terminal.write(...)</code>, <code>terminal.writeln(...)</code>, <code>terminal.paste(...)</code>.</li>
+<li><code>terminal.resize(cols, rows)</code>.</li>
+<li><code>terminal.refresh(start, end)</code>.</li>
+<li><code>terminal.reset()</code>.</li>
+<li><code>terminal.scrollLines(...)</code>, <code>terminal.scrollPages(...)</code>, <code>terminal.scrollToTop()</code>, <code>terminal.scrollToBottom()</code>, <code>terminal.scrollToLine(...)</code>.</li>
+<li><code>terminal.clear()</code>.</li>
+<li><code>terminal.focus()</code> and <code>terminal.blur()</code>.</li>
+<li><code>Terminal.strings</code>: global localizable strings (<code>promptLabel</code>, <code>tooMuchOutput</code>).</li>
+</ul>
+<h2 id="current-usage-in-console-terminal">Current Usage in console-terminal</h2>
+<ul>
+<li><code>Terminal</code> is created in <code>console-terminal/ui/src/TerminalView.tsx</code>.</li>
+<li>Options currently set: <code>allowProposedApi</code>, <code>cursorBlink</code>, <code>fontFamily</code>, responsive <code>fontSize</code>, and <code>theme.background</code>.</li>
+<li>Addons loaded: <code>FitAddon</code>, <code>SerializeAddon</code>, <code>WebLinksAddon</code>.</li>
+<li>Hooks used: <code>onTitleChange</code> (updates UI title), <code>onResize</code> (sends cols/rows to server), <code>onData</code> (sends input), <code>attachCustomKeyEventHandler</code> (Shift+Enter opens composer).</li>
+<li>Mobile UX: custom touch scroll handling and input <code>textarea</code> attributes to reduce autofill/suggestions.</li>
+<li><code>SerializeAddon</code> powers <code>getSnapshot()</code> (for reconnect).</li>
+<li><code>onOutput</code> hook is used to tap terminal output (TTS fallback).</li>
+</ul>
+    </article>
+  </main>
+</body>
+</html>
