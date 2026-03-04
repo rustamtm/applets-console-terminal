@@ -340,8 +340,6 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
       thumbHeight: 0
     })
   );
-  const [mobileBarVisible, setMobileBarVisible] = useState(false);
-  const mobileBarVisibleRef = useRef(false);
   const keyboardOffsetRef = useRef(0);
   const fontSizeOverrideRef = useRef<number | null>(null);
   const fontSizeRef = useRef<number>(initialIsSmall ? 11 : 13);
@@ -607,11 +605,6 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
 
   useEffect(() => {
     isSmallScreenRef.current = isSmallScreen;
-    const nextMobileBarVisible = isSmallScreen && keyboardOffsetRef.current > 0;
-    if (nextMobileBarVisible !== mobileBarVisibleRef.current) {
-      mobileBarVisibleRef.current = nextMobileBarVisible;
-      setMobileBarVisible(nextMobileBarVisible);
-    }
     scheduleScrollCheck();
   }, [isSmallScreen, scheduleScrollCheck]);
 
@@ -702,11 +695,6 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
         return;
       }
       keyboardOffsetRef.current = offset;
-      const nextMobileBarVisible = isSmallScreenRef.current && offset > 0;
-      if (nextMobileBarVisible !== mobileBarVisibleRef.current) {
-        mobileBarVisibleRef.current = nextMobileBarVisible;
-        setMobileBarVisible(nextMobileBarVisible);
-      }
       document.documentElement.style.setProperty("--keyboard-offset", `${Math.round(offset)}px`);
       if (offset > 0 && atBottomRef.current) {
         termRef.current?.scrollToBottom();
@@ -722,10 +710,6 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
       viewport.removeEventListener("resize", updateViewport);
       viewport.removeEventListener("scroll", updateViewport);
       document.documentElement.style.setProperty("--keyboard-offset", "0px");
-      if (mobileBarVisibleRef.current) {
-        mobileBarVisibleRef.current = false;
-        setMobileBarVisible(false);
-      }
     };
   }, [scheduleFit, scheduleScrollCheck]);
 
@@ -1486,6 +1470,17 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
     focusTerminal();
   }, [focusTerminal, scheduleScrollCheck]);
 
+  const helperSendDisabled = conn.status !== "connected";
+
+  const runHelpersUpdate = useCallback(() => {
+    if (helperSendDisabled) {
+      focusTerminal();
+      return;
+    }
+    sendInput("pip install -U applets-helpers\r");
+    focusTerminal();
+  }, [focusTerminal, helperSendDisabled, sendInput]);
+
   useEffect(() => {
     const terminal = termRef.current;
     if (!terminal) return;
@@ -1751,7 +1746,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
   }, [conn, focusTerminal, scheduleFit, scheduleScrollCheck, queueTerminalWrite, cancelQueuedWrites]);
 
   return (
-    <div className={`terminalHost${mobileBarVisible ? " mobileBarVisible" : ""}`} onClick={focusTerminal} ref={hostRef}>
+    <div className="terminalHost" onClick={focusTerminal} ref={hostRef}>
       <div ref={containerRef} className="terminalContainer" />
     <div
       className={[
@@ -1797,6 +1792,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
           type="button"
           className="terminalMobileButton"
           onClick={() => sendSpecial("\u001b")}
+          disabled={helperSendDisabled}
           aria-label="Esc"
           title="Esc"
         >
@@ -1806,6 +1802,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
           type="button"
           className="terminalMobileButton"
           onClick={() => sendSpecial("\t")}
+          disabled={helperSendDisabled}
           aria-label="Tab"
           title="Tab"
         >
@@ -1819,6 +1816,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
           type="button"
           className="terminalMobileButton"
           onClick={() => sendSpecial("\u0003")}
+          disabled={helperSendDisabled}
           aria-label="Ctrl+C"
           title="Ctrl+C"
         >
@@ -1832,6 +1830,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
           type="button"
           className="terminalMobileButton"
           onClick={() => sendSpecial("\u0015")}
+          disabled={helperSendDisabled}
           aria-label="Clear line"
           title="Clear line (Ctrl+U)"
         >
@@ -1841,6 +1840,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
           type="button"
           className="terminalMobileButton"
           onClick={() => sendSpecial("\r")}
+          disabled={helperSendDisabled}
           aria-label="Enter"
           title="Enter"
         >
@@ -1854,6 +1854,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
           type="button"
           className="terminalMobileButton"
           onClick={() => void pasteFromClipboard()}
+          disabled={helperSendDisabled}
           aria-label="Paste"
           title="Paste"
         >
@@ -1866,7 +1867,8 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
         <button
           type="button"
           className="terminalMobileButton"
-          onClick={() => sendInput("pip install -U applets-helpers\r")}
+          onClick={runHelpersUpdate}
+          disabled={helperSendDisabled}
           aria-label="Update Helpers"
           title="Update Applets Helpers"
         >
@@ -1880,6 +1882,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
           type="button"
           className="terminalMobileButton"
           onClick={() => sendSpecial("\u001b[A")}
+          disabled={helperSendDisabled}
           aria-label="Arrow up"
           title="Arrow up"
         >
@@ -1893,6 +1896,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
           type="button"
           className="terminalMobileButton"
           onClick={() => sendSpecial("\u001b[B")}
+          disabled={helperSendDisabled}
           aria-label="Arrow down"
           title="Arrow down"
         >
@@ -1906,6 +1910,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
           type="button"
           className="terminalMobileButton"
           onClick={() => sendSpecial("\u001b[D")}
+          disabled={helperSendDisabled}
           aria-label="Arrow left"
           title="Arrow left"
         >
@@ -1919,6 +1924,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
           type="button"
           className="terminalMobileButton"
           onClick={() => sendSpecial("\u001b[C")}
+          disabled={helperSendDisabled}
           aria-label="Arrow right"
           title="Arrow right"
         >
@@ -1958,6 +1964,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
           type="button"
           className="terminalMobileButton"
           onClick={() => sendSpecial("\u001b[H")}
+          disabled={helperSendDisabled}
           aria-label="Home"
           title="Home"
         >
@@ -1971,6 +1978,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
           type="button"
           className="terminalMobileButton"
           onClick={() => sendSpecial("\u001b[F")}
+          disabled={helperSendDisabled}
           aria-label="End"
           title="End"
         >
