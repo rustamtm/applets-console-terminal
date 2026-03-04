@@ -1829,10 +1829,10 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
         <button
           type="button"
           className="terminalMobileButton"
-          onClick={() => sendSpecial("\u0015")}
+          onClick={() => sendSpecial(BACKSPACE)}
           disabled={helperSendDisabled}
-          aria-label="Clear line"
-          title="Clear line (Ctrl+U)"
+          aria-label="Delete"
+          title="Delete (Backspace)"
         >
           <span className="terminalMobileIcon" aria-hidden="true" style={maskStyleForSvgButton("ui-trash-2.svg")} />
         </button>
