@@ -340,6 +340,8 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
       thumbHeight: 0
     })
   );
+  const [mobileBarVisible, setMobileBarVisible] = useState(false);
+  const mobileBarVisibleRef = useRef(false);
   const keyboardOffsetRef = useRef(0);
   const fontSizeOverrideRef = useRef<number | null>(null);
   const fontSizeRef = useRef<number>(initialIsSmall ? 11 : 13);
@@ -605,6 +607,11 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
 
   useEffect(() => {
     isSmallScreenRef.current = isSmallScreen;
+    const nextMobileBarVisible = isSmallScreen && keyboardOffsetRef.current > 0;
+    if (nextMobileBarVisible !== mobileBarVisibleRef.current) {
+      mobileBarVisibleRef.current = nextMobileBarVisible;
+      setMobileBarVisible(nextMobileBarVisible);
+    }
     scheduleScrollCheck();
   }, [isSmallScreen, scheduleScrollCheck]);
 
@@ -695,6 +702,11 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
         return;
       }
       keyboardOffsetRef.current = offset;
+      const nextMobileBarVisible = isSmallScreenRef.current && offset > 0;
+      if (nextMobileBarVisible !== mobileBarVisibleRef.current) {
+        mobileBarVisibleRef.current = nextMobileBarVisible;
+        setMobileBarVisible(nextMobileBarVisible);
+      }
       document.documentElement.style.setProperty("--keyboard-offset", `${Math.round(offset)}px`);
       if (offset > 0 && atBottomRef.current) {
         termRef.current?.scrollToBottom();
@@ -710,6 +722,10 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
       viewport.removeEventListener("resize", updateViewport);
       viewport.removeEventListener("scroll", updateViewport);
       document.documentElement.style.setProperty("--keyboard-offset", "0px");
+      if (mobileBarVisibleRef.current) {
+        mobileBarVisibleRef.current = false;
+        setMobileBarVisible(false);
+      }
     };
   }, [scheduleFit, scheduleScrollCheck]);
 
@@ -1735,7 +1751,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, Props>(
   }, [conn, focusTerminal, scheduleFit, scheduleScrollCheck, queueTerminalWrite, cancelQueuedWrites]);
 
   return (
-    <div className="terminalHost" onClick={focusTerminal} ref={hostRef}>
+    <div className={`terminalHost${mobileBarVisible ? " mobileBarVisible" : ""}`} onClick={focusTerminal} ref={hostRef}>
       <div ref={containerRef} className="terminalContainer" />
     <div
       className={[

@@ -2435,11 +2435,29 @@ a.iconButton {
   display: none !important;
 }
 
-.app.servicenowTheme .terminalMobileBar {
-  display: none !important;
+.app.servicenowTheme .terminalHost {
+  padding-bottom: calc(10px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px)) !important;
 }
 
 .app.servicenowTheme.showTerminalMobileBar .terminalHost,
-.app.servicenowTheme .terminalHost {
-  padding-bottom: calc(10px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px)) !important;
+.app.servicenowTheme .terminalHost.mobileBarVisible {
+  padding-bottom: calc(56px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px)) !important;
+}
+
+@media (max-width: 720px) {
+  .app.servicenowTheme .terminalMobileBar {
+    display: none !important;
+  }
+
+  .app.servicenowTheme .terminalHost.mobileBarVisible .terminalMobileBar {
+    display: flex !important;
+  }
+
+  .app.servicenowTheme .terminalScrollLock {
+    bottom: calc(12px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px)) !important;
+  }
+
+  .app.servicenowTheme .terminalHost.mobileBarVisible .terminalScrollLock {
+    bottom: calc(64px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px)) !important;
+  }
 }
